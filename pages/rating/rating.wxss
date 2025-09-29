@@ -1,0 +1,160 @@
+/* pages/rating/rating.wxss */
+.container {
+  padding: 0;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+/* 头部区域 */
+.header {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  padding: 60rpx 40rpx 40rpx;
+  text-align: center;
+  color: white;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* 菜品列表 */
+.dishes-list {
+  padding: 20rpx;
+}
+
+.dish-item {
+  background-color: white;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.dish-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.dish-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  margin-right: 20rpx;
+}
+
+.dish-info {
+  flex: 1;
+}
+
+.dish-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.dish-category {
+  font-size: 22rpx;
+  color: #666;
+}
+
+/* 评分区域 */
+.rating-section {
+  margin-bottom: 30rpx;
+}
+
+.rating-label {
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 15rpx;
+}
+
+.stars {
+  display: flex;
+  gap: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+.star {
+  font-size: 40rpx;
+  color: #ddd;
+  transition: color 0.3s ease;
+}
+
+.star.active {
+  color: #ffc107;
+}
+
+.rating-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 评价内容 */
+.comment-section {
+  margin-bottom: 20rpx;
+}
+
+.comment-label {
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 15rpx;
+}
+
+.comment-input {
+  width: 100%;
+  min-height: 120rpx;
+  padding: 20rpx;
+  border: 2rpx solid #e9ecef;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.5;
+  background-color: #f8f9fa;
+  box-sizing: border-box;
+}
+
+.comment-input:focus {
+  border-color: #ff6b6b;
+  background-color: white;
+}
+
+.comment-count {
+  text-align: right;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* 底部操作区域 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 20rpx;
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20rpx;
+}
+
+.bottom-actions .btn {
+  flex: 1;
+  height: 80rpx;
+  font-size: 26rpx;
+  border-radius: 40rpx;
+}
+
+.bottom-actions .btn[disabled] {
+  background-color: #ccc;
+  color: #999;
+}

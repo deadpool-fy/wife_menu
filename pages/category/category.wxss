@@ -1,0 +1,171 @@
+/* pages/category/category.wxss */
+.container {
+  padding: 0;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+/* 分类标签区域 */
+.category-tabs {
+  background-color: white;
+  padding: 20rpx 0;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.tabs-scroll {
+  white-space: nowrap;
+  padding: 0 20rpx;
+}
+
+.tab-item {
+  display: inline-block;
+  padding: 20rpx 30rpx;
+  margin-right: 20rpx;
+  border-radius: 25rpx;
+  font-size: 26rpx;
+  color: #666;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+/* 菜品网格区域 */
+.dishes-grid {
+  padding: 20rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.dish-card {
+  background-color: white;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.dish-image {
+  width: 100%;
+  height: 200rpx;
+}
+
+.dish-info {
+  padding: 20rpx;
+}
+
+.dish-name {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dish-meta {
+  display: flex;
+  gap: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+.category-tag, .difficulty-tag {
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  color: white;
+}
+
+.category-tag {
+  background-color: #ff6b6b;
+}
+
+.difficulty-tag {
+  background-color: #28a745;
+}
+
+.dish-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  color: #999;
+}
+
+.dish-actions {
+  padding: 0 20rpx 20rpx;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 16rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  background-color: #ff6b6b;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.action-btn.selected {
+  background-color: #28a745;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 40rpx;
+  text-align: center;
+}
+
+.empty-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.empty-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 底部操作区域 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 20rpx;
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.selected-info {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.bottom-actions .btn {
+  padding: 20rpx 40rpx;
+  border-radius: 25rpx;
+  font-size: 26rpx;
+}

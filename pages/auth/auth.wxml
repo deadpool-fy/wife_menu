@@ -1,0 +1,66 @@
+<!--pages/auth/auth.wxml-->
+<view class="container">
+  <!-- 头部区域 -->
+  <view class="header">
+    <view class="title">授权设置</view>
+    <view class="subtitle">为了提供更好的服务，需要您的授权</view>
+  </view>
+
+  <!-- 授权列表 -->
+  <view class="auth-list">
+    <view class="auth-item">
+      <view class="auth-info">
+        <view class="auth-icon">📱</view>
+        <view class="auth-content">
+          <view class="auth-title">消息通知</view>
+          <view class="auth-desc">发送菜单和评价消息给您</view>
+        </view>
+      </view>
+      <view class="auth-status {{subscribeMessageAuth ? 'authorized' : 'unauthorized'}}">
+        {{subscribeMessageAuth ? '已授权' : '未授权'}}
+      </view>
+    </view>
+
+    <view class="auth-item">
+      <view class="auth-info">
+        <view class="auth-icon">👤</view>
+        <view class="auth-content">
+          <view class="auth-title">用户信息</view>
+          <view class="auth-desc">获取基本信息用于个性化推荐</view>
+        </view>
+      </view>
+      <view class="auth-status {{userInfoAuth ? 'authorized' : 'unauthorized'}}">
+        {{userInfoAuth ? '已授权' : '未授权'}}
+      </view>
+    </view>
+
+    <view class="auth-item">
+      <view class="auth-info">
+        <view class="auth-icon">📍</view>
+        <view class="auth-content">
+          <view class="auth-title">位置信息</view>
+          <view class="auth-desc">推荐附近的餐厅和食材</view>
+        </view>
+      </view>
+      <view class="auth-status {{locationAuth ? 'authorized' : 'unauthorized'}}">
+        {{locationAuth ? '已授权' : '未授权'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="btn btn-primary" bindtap="requestAllAuth">一键授权</button>
+    <button class="btn btn-secondary" bindtap="openSetting">手动设置</button>
+  </view>
+
+  <!-- 说明文字 -->
+  <view class="tips">
+    <view class="tips-title">授权说明</view>
+    <view class="tips-content">
+      • 消息通知：用于发送菜单和评价消息给您的家人<br/>
+      • 用户信息：用于个性化推荐和记录偏好<br/>
+      • 位置信息：用于推荐附近的餐厅和食材购买地点
+    </view>
+  </view>
+</view>

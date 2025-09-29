@@ -1,0 +1,74 @@
+<!--pages/category/category.wxml-->
+<view class="container">
+  <!-- 分类标签区域 -->
+  <view class="category-tabs">
+    <scroll-view class="tabs-scroll" scroll-x="true">
+      <view class="tab-item {{currentCategory === 'all' ? 'active' : ''}}" 
+            bindtap="switchCategory" data-category="all">
+        全部
+      </view>
+      <view class="tab-item {{currentCategory === 'meat' ? 'active' : ''}}" 
+            bindtap="switchCategory" data-category="meat">
+        荤菜
+      </view>
+      <view class="tab-item {{currentCategory === 'vegetable' ? 'active' : ''}}" 
+            bindtap="switchCategory" data-category="vegetable">
+        素菜
+      </view>
+      <view class="tab-item {{currentCategory === 'mixed' ? 'active' : ''}}" 
+            bindtap="switchCategory" data-category="mixed">
+        荤素搭配
+      </view>
+      <view class="tab-item {{currentCategory === 'soup' ? 'active' : ''}}" 
+            bindtap="switchCategory" data-category="soup">
+        汤类
+      </view>
+      <view class="tab-item {{currentCategory === 'dessert' ? 'active' : ''}}" 
+            bindtap="switchCategory" data-category="dessert">
+        甜品
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 菜品网格区域 -->
+  <view class="dishes-grid">
+    <view class="dish-card" wx:for="{{filteredDishes}}" wx:key="id" 
+          bindtap="goToDetail" data-dish="{{item}}">
+      <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="dish-info">
+        <view class="dish-name">{{item.name}}</view>
+        <view class="dish-meta">
+          <text class="category-tag">{{item.category}}</text>
+          <text class="difficulty-tag">{{item.difficulty}}</text>
+        </view>
+        <view class="dish-stats">
+          <text class="time-text">{{item.cookingTime}}</text>
+          <text class="servings-text">{{item.servings}}人份</text>
+        </view>
+      </view>
+      <view class="dish-actions">
+        <view class="action-btn {{item.selected ? 'selected' : ''}}" 
+              bindtap="toggleSelect" data-dish="{{item}}" catchtap="true">
+          {{item.selected ? '已选' : '选择'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredDishes.length === 0}}">
+    <image class="empty-image" src="/images/empty.png" mode="aspectFit"></image>
+    <view class="empty-text">暂无{{categoryName}}菜品</view>
+    <view class="empty-desc">试试其他分类吧</view>
+  </view>
+
+  <!-- 底部操作区域 -->
+  <view class="bottom-actions" wx:if="{{selectedCount > 0}}">
+    <view class="selected-info">
+      <text>已选择 {{selectedCount}} 道菜</text>
+    </view>
+    <button class="btn btn-primary" bindtap="goToMenu">
+      查看菜单
+    </button>
+  </view>
+</view>

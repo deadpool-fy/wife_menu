@@ -1,0 +1,53 @@
+<!--pages/rating/rating.wxml-->
+<view class="container">
+  <!-- 头部信息 -->
+  <view class="header">
+    <view class="title">为今天的菜品评分</view>
+    <view class="subtitle">您的评价将帮助我们改进菜单推荐</view>
+  </view>
+
+  <!-- 菜品列表 -->
+  <view class="dishes-list">
+    <view class="dish-item" wx:for="{{selectedDishes}}" wx:key="id">
+      <view class="dish-header">
+        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="dish-info">
+          <view class="dish-name">{{item.name}}</view>
+          <view class="dish-category">{{item.category}}</view>
+        </view>
+      </view>
+      
+      <!-- 评分区域 -->
+      <view class="rating-section">
+        <view class="rating-label">味道评分</view>
+        <view class="stars">
+          <view class="star {{index < item.rating ? 'active' : ''}}" 
+                wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+                bindtap="setRating" data-dish-id="{{item.id}}" data-rating="{{index + 1}}">
+            ⭐
+          </view>
+        </view>
+        <view class="rating-text">{{item.rating > 0 ? item.rating + '分' : '请评分'}}</view>
+      </view>
+      
+      <!-- 评价内容 -->
+      <view class="comment-section">
+        <view class="comment-label">评价内容</view>
+        <textarea class="comment-input" 
+                  placeholder="说说这道菜的味道如何，有什么建议..." 
+                  value="{{item.comment}}"
+                  bindinput="onCommentInput"
+                  data-dish-id="{{item.id}}"
+                  maxlength="200"></textarea>
+        <view class="comment-count">{{item.comment ? item.comment.length : 0}}/200</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作区域 -->
+  <view class="bottom-actions">
+    <button class="btn btn-secondary" bindtap="skipRating">跳过评价</button>
+    <button class="btn btn-primary" bindtap="submitRating" 
+            disabled="{{!canSubmit}}">提交评价</button>
+  </view>
+</view>

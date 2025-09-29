@@ -1,0 +1,50 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 头部欢迎区域 -->
+  <view class="header">
+    <view class="welcome-text">今天想吃什么？</view>
+    <view class="date-text">{{currentDate}}</view>
+  </view>
+
+  <!-- 已选菜品区域 -->
+  <view class="selected-section" wx:if="{{selectedDishes.length > 0}}">
+    <view class="section-title">
+      <text>已选择的菜品 ({{selectedDishes.length}})</text>
+      <text class="clear-btn" bindtap="clearSelected">清空</text>
+    </view>
+    <scroll-view class="selected-dishes" scroll-x="true">
+      <view class="selected-dish-item" wx:for="{{selectedDishes}}" wx:key="id">
+        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="dish-name">{{item.name}}</view>
+        <view class="remove-btn" bindtap="removeDish" data-id="{{item.id}}">×</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 推荐菜品区域 -->
+  <view class="recommend-section">
+    <view class="section-title">今日推荐</view>
+    <view class="dish-grid">
+      <view class="dish-card" wx:for="{{recommendDishes}}" wx:key="id">
+        <view class="dish-content" bindtap="goToDetail" data-dish="{{item}}">
+          <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="dish-info">
+            <view class="dish-name">{{item.name}}</view>
+            <view class="dish-category">{{item.category}}</view>
+            <view class="dish-difficulty">难度: {{item.difficulty}}</view>
+          </view>
+        </view>
+        <view class="select-btn {{item.selected ? 'selected' : ''}}" bindtap="selectDish" data-dish="{{item}}">
+          {{item.selected ? '已选' : '选择'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作区域 -->
+  <view class="bottom-actions" wx:if="{{selectedDishes.length > 0}}">
+    <button class="btn btn-primary send-btn" bindtap="sendToWeChat">
+      发送给老公 ({{selectedDishes.length}}道菜)
+    </button>
+  </view>
+</view>

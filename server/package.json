@@ -1,0 +1,25 @@
+{
+  "name": "wechat-message-sender",
+  "version": "1.0.0",
+  "description": "微信消息发送服务",
+  "main": "wechat-message-sender.js",
+  "scripts": {
+    "start": "node wechat-message-sender.js",
+    "dev": "nodemon wechat-message-sender.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "wechat",
+    "message",
+    "template",
+    "miniprogram"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
