@@ -138,7 +138,9 @@ function sendTemplateMessageToServer(message) {
           console.log('云函数返回失败:', res.result)
           reject({
             success: false,
-            message: res.result ? res.result.message : '模板消息发送失败'
+            message: res.result ? res.result.message : '模板消息发送失败',
+            errCode: res.result ? res.result.errCode : null,
+            solution: res.result ? res.result.solution : null
           })
         }
       },

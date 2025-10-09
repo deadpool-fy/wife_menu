@@ -16,16 +16,20 @@
   "tabBar": {
     "color": "#666666",
     "selectedColor": "#ff6b6b",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "backgroundColor": "rgba(255, 255, 255, 0.95)",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "今日菜单"
+        "text": "今日菜单",
+        "iconPath": "images/menu.png",
+        "selectedIconPath": "images/menu-active.png"
       },
       {
         "pagePath": "pages/category/category",
-        "text": "分类浏览"
+        "text": "分类浏览",
+        "iconPath": "images/category.png",
+        "selectedIconPath": "images/category-active.png"
       }
     ]
   },

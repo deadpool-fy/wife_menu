@@ -31,7 +31,7 @@
           <view class="dish-info">
             <view class="dish-name">{{item.name}}</view>
             <view class="dish-category">{{item.category}}</view>
-            <view class="dish-difficulty">难度: {{item.difficulty}}</view>
+            <view class="dish-calories">卡路里: {{item.calories}}卡</view>
           </view>
         </view>
         <view class="select-btn {{item.selected ? 'selected' : ''}}" bindtap="selectDish" data-dish="{{item}}">

@@ -7,7 +7,7 @@
       <view class="dish-title">{{dishDetail.name}}</view>
       <view class="dish-meta">
         <text class="category-tag">{{dishDetail.category}}</text>
-        <text class="difficulty-tag">{{dishDetail.difficulty}}</text>
+        <text class="calories-tag">{{dishDetail.calories}}卡</text>
         <text class="time-tag">{{dishDetail.cookingTime}}</text>
       </view>
     </view>
@@ -20,8 +20,8 @@
     
     <view class="info-grid">
       <view class="info-item">
-        <view class="info-label">难度等级</view>
-        <view class="info-value">{{dishDetail.difficulty}}</view>
+        <view class="info-label">卡路里</view>
+        <view class="info-value">{{dishDetail.calories}}卡</view>
       </view>
       <view class="info-item">
         <view class="info-label">制作时间</view>
@@ -32,8 +32,8 @@
         <view class="info-value">{{dishDetail.servings}}人</view>
       </view>
       <view class="info-item">
-        <view class="info-label">热量</view>
-        <view class="info-value">{{dishDetail.calories}}卡</view>
+        <view class="info-label">菜品类型</view>
+        <view class="info-value">{{dishDetail.category}}</view>
       </view>
     </view>
   </view>

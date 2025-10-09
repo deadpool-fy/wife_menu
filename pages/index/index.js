@@ -1,6 +1,7 @@
 // pages/index/index.js
 const app = getApp()
 const messageService = require('../../utils/messageService.js')
+const { getRecommendDishes } = require('../../data/dishes.js')
 
 Page({
   data: {
@@ -44,52 +45,11 @@ Page({
 
   // 加载推荐菜品
   loadRecommendDishes() {
-    // 这里应该从服务器获取推荐菜品，现在使用模拟数据
-    const mockDishes = [
-      {
-        id: 1,
-        name: '宫保鸡丁',
-        category: '荤菜',
-        difficulty: '中等',
-        image: 'https://via.placeholder.com/300x200/ff6b6b/ffffff?text=宫保鸡丁',
-        selected: false
-      },
-      {
-        id: 2,
-        name: '麻婆豆腐',
-        category: '素菜',
-        difficulty: '简单',
-        image: 'https://via.placeholder.com/300x200/4ecdc4/ffffff?text=麻婆豆腐',
-        selected: false
-      },
-      {
-        id: 3,
-        name: '红烧肉',
-        category: '荤菜',
-        difficulty: '中等',
-        image: 'https://via.placeholder.com/300x200/45b7d1/ffffff?text=红烧肉',
-        selected: false
-      },
-      {
-        id: 4,
-        name: '清炒小白菜',
-        category: '素菜',
-        difficulty: '简单',
-        image: 'https://via.placeholder.com/300x200/96ceb4/ffffff?text=清炒小白菜',
-        selected: false
-      },
-      {
-        id: 5,
-        name: '糖醋里脊',
-        category: '荤菜',
-        difficulty: '中等',
-        image: 'https://via.placeholder.com/300x200/feca57/ffffff?text=糖醋里脊',
-        selected: false
-      }
-    ]
-
+    // 从数据文件获取推荐菜品
+    const recommendDishes = getRecommendDishes()
+    
     this.setData({
-      recommendDishes: mockDishes
+      recommendDishes: recommendDishes
     })
   },
 
@@ -231,10 +191,22 @@ Page({
       })
       .catch((error) => {
         wx.hideLoading()
-        wx.showToast({
-          title: error.message || '发送失败',
-          icon: 'none'
-        })
+        console.log('发送失败:', error)
+        
+        // 权限错误特殊处理
+        if (error.errCode === -604101) {
+          wx.showModal({
+            title: '权限不足',
+            content: `${error.message}\n\n解决方案：${error.solution}`,
+            showCancel: false,
+            confirmText: '知道了'
+          })
+        } else {
+          wx.showToast({
+            title: error.message || '发送失败',
+            icon: 'none'
+          })
+        }
       })
   },
 

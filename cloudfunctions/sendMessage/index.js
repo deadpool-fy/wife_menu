@@ -12,13 +12,57 @@ cloud.init({
 // 检查云函数权限
 const db = cloud.database()
 
+// 清理模板字段内容
+function sanitizeTemplateValue(value) {
+  if (!value) return ''
+  
+  // 移除换行符和特殊字符
+  return value
+    .replace(/[\r\n]/g, ' ')  // 替换换行符为空格
+    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s]/g, '') // 只保留中文、英文、数字和空格
+    .trim()
+    .substring(0, 20) // 限制20字符
+}
+
+// 提取菜单内容
+function extractMenuContent(message) {
+  if (!message) return ''
+  
+  // 提取菜品名称，移除时间和其他信息
+  const lines = message.split('\n')
+  const dishLines = lines.filter(line => 
+    line.trim() && 
+    !line.includes('时间：') && 
+    !line.includes('来自：') &&
+    !line.includes('今天中午的菜单：')
+  )
+  
+  // 提取菜品名称
+  const dishes = dishLines
+    .map(line => line.replace(/^\d+\.\s*/, '').trim()) // 移除序号
+    .filter(dish => dish.length > 0)
+    .slice(0, 2) // 最多取2个菜品
+  
+  return dishes.join(' ') || '今日菜单'
+}
+
+// 安全的JSON序列化函数
+function safeStringify(obj) {
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'bigint') {
+      return value.toString()
+    }
+    return value
+  }, 2)
+}
+
 // 云函数入口函数
 exports.main = async (event, context) => {
   console.log('=== 云函数开始执行 ===')
-  console.log('接收到的参数:', JSON.stringify(event, null, 2))
+  console.log('接收到的参数:', safeStringify(event))
   
   const wxContext = cloud.getWXContext()
-  console.log('微信上下文:', wxContext)
+  console.log('微信上下文:', safeStringify(wxContext))
   
   try {
     const { message, targetUserId, templateId } = event
@@ -46,68 +90,59 @@ exports.main = async (event, context) => {
     // 注意：订阅消息只能发送给当前调用云函数的用户
     // 如需发送给其他人，需要使用其他方式（如客服消息、统一服务消息等）
     const templateData = {
-      touser: wxContext.OPENID, // 发送给当前用户
+      touser: wxContext.OPENID, // 发送给当前用户（订阅消息限制）
       template_id: templateId,
       page: 'pages/index/index', // 点击消息跳转的页面
       data: {
         thing1: {
-          value: '已生成待确认菜谱' // 菜谱类型
+          value: sanitizeTemplateValue('已生成待确认菜谱') // 菜谱类型
         },
         time2: {
-          value: new Date().toLocaleString('zh-CN', {
+          value: sanitizeTemplateValue(new Date().toLocaleString('zh-CN', {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
-          }) // 菜谱日期
+          })) // 菜谱日期
         },
         thing4: {
-          value: message.length > 20 ? message.substring(0, 20) + '...' : message // 备注
+          value: sanitizeTemplateValue(extractMenuContent(message)) // 备注，提取菜单内容
         }
       },
       miniprogram_state: 'formal' // 正式版
     }
     
-    console.log('模板消息数据:', templateData)
+    console.log('模板消息数据:', safeStringify(templateData))
     
     // 发送订阅消息
     console.log('开始发送订阅消息')
     
     try {
       const result = await cloud.openapi.subscribeMessage.send(templateData)
-      console.log('订阅消息发送结果:', result)
+      console.log('订阅消息发送结果:', safeStringify(result))
       
       if (result.errCode === 0) {
         console.log('=== 消息发送成功 ===')
         const successResult = {
           success: true,
           message: '订阅消息发送成功',
-          data: result
+          data: {
+            errCode: result.errCode,
+            errMsg: result.errMsg
+          }
         }
-        console.log('返回成功结果:', successResult)
+        console.log('返回成功结果:', safeStringify(successResult))
         return successResult
       } else {
         console.log('订阅消息发送失败:', result.errMsg, '错误码:', result.errCode)
         
-        // 权限错误降级处理
+        // 权限错误直接提示
         if (result.errCode === -604101) {
-          console.log('权限错误-604101，降级到复制功能')
-          const cleanMessage = message.replace(/时间：.*?\n/g, '').replace(/来自：.*$/, '')
-          
+          console.log('权限错误-604101')
           return {
-            success: true,
-            message: '消息已准备，请手动转发给工口园',
-            needManualForward: true,
-            templateMessage: cleanMessage,
-            debugInfo: {
-              error: '权限错误-604101',
-              solution: '需要在微信公众平台绑定开发者身份',
-              steps: [
-                '1. 访问 https://mp.weixin.qq.com/',
-                '2. 成员管理 → 添加开发者',
-                '3. 绑定当前微信号',
-                '4. 重新登录开发者工具'
-              ]
-            }
+            success: false,
+            message: '权限不足，无法发送订阅消息',
+            errCode: result.errCode,
+            solution: '请在云开发控制台 → 设置 → 权限设置 → 令牌权限配置中添加：/wxa/openapi'
           }
         }
         
@@ -116,26 +151,19 @@ exports.main = async (event, context) => {
           message: `发送失败: ${result.errMsg}`,
           errCode: result.errCode
         }
-        console.log('返回失败结果:', failResult)
+        console.log('返回失败结果:', safeStringify(failResult))
         return failResult
       }
     } catch (apiError) {
       console.log('API调用异常:', apiError.message)
       
-      // 如果是权限错误，返回降级方案
+      // 如果是权限错误，直接提示
       if (apiError.message.includes('-604101')) {
-        const cleanMessage = message.replace(/时间：.*?\n/g, '').replace(/来自：.*$/, '')
-        
         return {
-          success: true,
-          message: '消息已准备（开发者权限待解决）',
-          needManualForward: true,
-          templateMessage: cleanMessage,
-          debugInfo: {
-            error: '权限错误-604101',
-            solution: '需要在微信公众平台绑定开发者身份',
-            urgency: 'high'
-          }
+          success: false,
+          message: '权限不足，无法发送订阅消息',
+          errCode: -604101,
+          solution: '请在云开发控制台 → 设置 → 权限设置 → 令牌权限配置中添加：/wxa/openapi'
         }
       }
       
@@ -148,20 +176,13 @@ exports.main = async (event, context) => {
     
     // 权限错误的特殊处理
     if (error.message && error.message.includes('-604101')) {
-      const cleanMessage = event.message ? event.message.replace(/时间：.*?\n/g, '').replace(/来自：.*$/, '') : ''
-      
       const errorResult = {
-        success: true,
-        message: '消息已准备（权限问题），请手动转发',
-        needManualForward: true,
-        templateMessage: cleanMessage,
-        debugInfo: {
-          error: '权限错误-604101',
-          solution: '绑定开发者身份',
-          actionRequired: 'manual_forward'
-        }
+        success: false,
+        message: '权限不足，无法发送订阅消息',
+        errCode: -604101,
+        solution: '请在云开发控制台 → 设置 → 权限设置 → 令牌权限配置中添加：/wxa/openapi'
       }
-      console.log('权限错误降级结果:', errorResult)
+      console.log('权限错误直接提示:', safeStringify(errorResult))
       return errorResult
     }
     
@@ -170,7 +191,7 @@ exports.main = async (event, context) => {
       message: '发送失败，请稍后重试',
       error: error.message
     }
-    console.log('返回异常结果:', errorResult)
+    console.log('返回异常结果:', safeStringify(errorResult))
     return errorResult
   }
 }

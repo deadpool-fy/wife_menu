@@ -5,11 +5,11 @@ module.exports = {
   // 目标用户配置
   TARGET_USER: {
     // 您丈夫的微信ID
-    WECHAT_ID: 'fy841864874',
+    WECHAT_ID: 'Dingding7654321_',
     // 您丈夫的微信昵称（用于显示）
-    NICKNAME: '工口园',
+    NICKNAME: '宝宝',
     // 您丈夫的手机号（可选，用于其他联系方式）
-    PHONE: ''
+    PHONE: '18056052398'
   },
 
   // 客服消息配置
