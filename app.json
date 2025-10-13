@@ -4,7 +4,10 @@
     "pages/detail/detail",
     "pages/rating/rating",
     "pages/category/category",
-    "pages/auth/auth"
+    "pages/auth/auth",
+    "pages/admin/admin",
+    "pages/recipe-add/recipe-add",
+    "pages/recipe-manage/recipe-manage"
   ],
   "window": {
     "backgroundTextStyle": "light",

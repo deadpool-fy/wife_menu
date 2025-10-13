@@ -1,13 +1,16 @@
 // pages/index/index.js
 const app = getApp()
 const messageService = require('../../utils/messageService.js')
-const { getRecommendDishes } = require('../../data/dishes.js')
+const cloudApiService = require('../../utils/cloudApi.js')
 
 Page({
   data: {
     currentDate: '',
     selectedDishes: [],
-    recommendDishes: []
+    recommendDishes: [],
+    loading: false,
+    error: null,
+    weatherInfo: '晴天 22°C'
   },
 
   onLoad() {
@@ -44,13 +47,102 @@ Page({
   },
 
   // 加载推荐菜品
-  loadRecommendDishes() {
-    // 从数据文件获取推荐菜品
-    const recommendDishes = getRecommendDishes()
+  async loadRecommendDishes() {
+    this.setData({ loading: true, error: null })
     
-    this.setData({
-      recommendDishes: recommendDishes
-    })
+    try {
+      // 从云开发获取推荐菜品
+      const response = await cloudApiService.getRecommendRecipes(20)
+      
+      if (response.success) {
+        // 转换数据格式以适配小程序
+        const recommendDishes = response.data.map(recipe => ({
+          id: recipe._id,
+          name: recipe.title,
+          image: recipe.image || '/images/default-dish.png',
+          category: recipe.category,
+          difficulty: recipe.difficulty,
+          cookingTime: recipe.cookingTime,
+          calories: recipe.calories,
+          servings: recipe.servings,
+          rating: recipe.rating,
+          likeCount: recipe.likeCount,
+          selected: false
+        }))
+        
+        this.setData({
+          recommendDishes: recommendDishes,
+          loading: false
+        })
+        
+        // 更新推荐菜品的选中状态
+        this.updateRecommendDishes()
+      } else {
+        throw new Error(response.message || '获取推荐菜品失败')
+      }
+    } catch (error) {
+      console.error('加载推荐菜品失败:', error)
+      
+      // 检查是否需要初始化数据库
+      if (error.message.includes('collection') || error.message.includes('not found')) {
+        await this.initDatabase();
+        return;
+      }
+      
+      // 如果云开发失败，使用本地数据作为备用
+      const { getRecommendDishes } = require('../../data/dishes.js')
+      const fallbackDishes = getRecommendDishes()
+      
+      this.setData({
+        recommendDishes: fallbackDishes,
+        loading: false,
+        error: '网络连接失败，已加载本地数据'
+      })
+      
+      wx.showToast({
+        title: '网络连接失败，已加载本地数据',
+        icon: 'none',
+        duration: 2000
+      })
+    }
+  },
+
+  // 初始化数据库
+  async initDatabase() {
+    try {
+      wx.showLoading({
+        title: '正在初始化数据库...'
+      });
+      
+      // 调用云函数初始化数据库
+      const result = await wx.cloud.callFunction({
+        name: 'init-database'
+      });
+      
+      wx.hideLoading();
+      
+      if (result.result.success) {
+        wx.showToast({
+          title: '数据库初始化成功',
+          icon: 'success'
+        });
+        
+        // 重新加载推荐菜品
+        await this.loadRecommendDishes();
+      } else {
+        throw new Error(result.result.message || '初始化失败');
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('数据库初始化失败:', error);
+      
+      wx.showModal({
+        title: '数据库初始化失败',
+        content: '请检查云开发环境配置，或联系技术支持',
+        showCancel: false,
+        confirmText: '确定'
+      });
+    }
   },
 
   // 更新推荐菜品的选中状态
@@ -276,5 +368,13 @@ Page({
       desc: shareContent,
       path: '/pages/index/index'
     }
+  },
+
+
+  // 跳转到管理页面
+  goToAdmin() {
+    wx.navigateTo({
+      url: '/pages/admin/admin'
+    });
   }
 })

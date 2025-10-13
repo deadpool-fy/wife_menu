@@ -2,28 +2,74 @@
 <view class="container">
   <!-- 头部信息 -->
   <view class="header">
-    <view class="title">为今天的菜品评分</view>
-    <view class="subtitle">您的评价将帮助我们改进菜单推荐</view>
+    <view class="header-content">
+      <view class="welcome-section">
+        <view class="welcome-icon">⭐</view>
+        <view class="title">为今天的菜品评分</view>
+        <view class="subtitle">您的评价将帮助我们改进菜单推荐</view>
+      </view>
+      <view class="rating-progress">
+        <view class="progress-text">评分进度</view>
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{ratingProgress}}%"></view>
+        </view>
+        <view class="progress-count">{{completedRatings}}/{{totalDishes}}</view>
+      </view>
+    </view>
+    <view class="header-decoration">
+      <view class="decoration-star star-1">⭐</view>
+      <view class="decoration-star star-2">⭐</view>
+      <view class="decoration-star star-3">⭐</view>
+    </view>
   </view>
 
   <!-- 菜品列表 -->
   <view class="dishes-list">
-    <view class="dish-item" wx:for="{{selectedDishes}}" wx:key="id">
+    <view class="dish-item glass-card fade-in" 
+          wx:for="{{selectedDishes}}" 
+          wx:key="id"
+          style="animation-delay: {{index * 0.1}}s">
       <view class="dish-header">
-        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="dish-image-container">
+          <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="dish-badge" wx:if="{{item.isNew}}">新品</view>
+        </view>
         <view class="dish-info">
           <view class="dish-name">{{item.name}}</view>
-          <view class="dish-category">{{item.category}}</view>
+          <view class="dish-meta">
+            <view class="dish-category">{{item.category}}</view>
+            <view class="dish-difficulty">{{item.difficulty}}</view>
+          </view>
+          <view class="dish-stats">
+            <view class="stat-item">
+              <text class="stat-icon">🔥</text>
+              <text class="stat-text">{{item.calories}}卡</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-icon">⏱️</text>
+              <text class="stat-text">{{item.cookingTime}}</text>
+            </view>
+          </view>
         </view>
       </view>
       
       <!-- 评分区域 -->
       <view class="rating-section">
-        <view class="rating-label">味道评分</view>
+        <view class="rating-header">
+          <view class="rating-label">
+            <view class="label-icon">👅</view>
+            <text>味道评分</text>
+          </view>
+          <view class="rating-status {{item.rating > 0 ? 'completed' : 'pending'}}">
+            {{item.rating > 0 ? '已完成' : '待评分'}}
+          </view>
+        </view>
         <view class="stars">
           <view class="star {{index < item.rating ? 'active' : ''}}" 
                 wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
-                bindtap="setRating" data-dish-id="{{item.id}}" data-rating="{{index + 1}}">
+                bindtap="setRating" 
+                data-dish-id="{{item.id}}" 
+                data-rating="{{index + 1}}">
             ⭐
           </view>
         </view>
@@ -32,22 +78,53 @@
       
       <!-- 评价内容 -->
       <view class="comment-section">
-        <view class="comment-label">评价内容</view>
+        <view class="comment-header">
+          <view class="comment-label">
+            <view class="label-icon">💬</view>
+            <text>评价内容</text>
+          </view>
+          <view class="comment-count">{{item.comment ? item.comment.length : 0}}/200</view>
+        </view>
         <textarea class="comment-input" 
                   placeholder="说说这道菜的味道如何，有什么建议..." 
                   value="{{item.comment}}"
                   bindinput="onCommentInput"
                   data-dish-id="{{item.id}}"
                   maxlength="200"></textarea>
-        <view class="comment-count">{{item.comment ? item.comment.length : 0}}/200</view>
       </view>
     </view>
   </view>
 
   <!-- 底部操作区域 -->
-  <view class="bottom-actions">
-    <button class="btn btn-secondary" bindtap="skipRating">跳过评价</button>
-    <button class="btn btn-primary" bindtap="submitRating" 
-            disabled="{{!canSubmit}}">提交评价</button>
+  <view class="bottom-actions slide-up">
+    <view class="actions-content">
+      <view class="rating-summary">
+        <view class="summary-icon">📊</view>
+        <view class="summary-text">
+          <text class="summary-count">{{completedRatings}}/{{totalDishes}}道菜已评分</text>
+          <text class="summary-desc">完成评价获得积分奖励</text>
+        </view>
+      </view>
+      <view class="action-buttons">
+        <button class="btn btn-secondary btn-sm" bindtap="skipRating">
+          <view class="btn-content">
+            <view class="btn-icon">⏭️</view>
+            <text>跳过</text>
+          </view>
+        </button>
+        <button class="btn btn-primary" bindtap="submitRating" 
+                disabled="{{!canSubmit}}">
+          <view class="btn-content">
+            <view class="btn-icon">✅</view>
+            <text>提交评价</text>
+          </view>
+        </button>
+      </view>
+    </view>
+    <view class="actions-decoration">
+      <view class="decoration-dot"></view>
+      <view class="decoration-dot"></view>
+      <view class="decoration-dot"></view>
+    </view>
   </view>
 </view>

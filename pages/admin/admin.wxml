@@ -1,0 +1,119 @@
+<!--pages/admin/admin.wxml-->
+<view class="admin-container">
+  <!-- 头部 -->
+  <view class="admin-header">
+    <view class="header-content">
+      <view class="title">
+        <text class="title-icon">🛠️</text>
+        <text class="title-text">后台管理</text>
+      </view>
+      <view class="subtitle">管理菜谱数据和系统</view>
+    </view>
+  </view>
+
+  <!-- 菜谱管理 -->
+  <view class="recipe-management-section">
+    <view class="section-header">
+      <text class="section-title">菜谱管理</text>
+    </view>
+    <view class="management-card">
+      <button class="management-btn primary" bindtap="goToRecipeManage">
+        <text class="btn-icon">📝</text>
+        <text class="btn-text">菜谱管理</text>
+        <text class="btn-desc">查看、编辑、删除菜谱</text>
+      </button>
+      
+      <button class="management-btn secondary" bindtap="goToRecipeAdd">
+        <text class="btn-icon">➕</text>
+        <text class="btn-text">添加菜谱</text>
+        <text class="btn-desc">手动录入新菜谱</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 系统管理 -->
+  <view class="system-management-section">
+    <view class="section-header">
+      <text class="section-title">系统管理</text>
+    </view>
+    <view class="system-card">
+      <button class="system-btn info" bindtap="testConnection">
+        <text class="btn-icon">🔗</text>
+        <text class="btn-text">测试连接</text>
+        <text class="btn-desc">检查云函数连接状态</text>
+      </button>
+      
+      <button class="system-btn success" bindtap="initData">
+        <text class="btn-icon">🔄</text>
+        <text class="btn-text">初始化数据</text>
+        <text class="btn-desc">初始化基础数据</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 数据清理 -->
+  <view class="data-cleanup-section">
+    <view class="section-header">
+      <text class="section-title">数据清理</text>
+    </view>
+    <view class="cleanup-card">
+      <button class="cleanup-btn danger" bindtap="clearData">
+        <text class="btn-icon">🗑️</text>
+        <text class="btn-text">清空所有数据</text>
+        <text class="btn-desc">删除所有菜谱和分类数据</text>
+      </button>
+      
+      <button class="cleanup-btn warning" bindtap="clearRecipes">
+        <text class="btn-icon">🍽️</text>
+        <text class="btn-text">清空菜谱</text>
+        <text class="btn-desc">只删除菜谱数据</text>
+      </button>
+      
+      <button class="cleanup-btn warning" bindtap="clearCategories">
+        <text class="btn-icon">📂</text>
+        <text class="btn-text">清空分类</text>
+        <text class="btn-desc">只删除分类数据</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 系统日志 -->
+  <view class="logs-section">
+    <view class="section-header">
+      <text class="section-title">系统日志</text>
+      <button class="refresh-btn" bindtap="refreshLogs">
+        <text class="btn-icon">🔄</text>
+      </button>
+    </view>
+    <view class="logs-card">
+      <view class="log-item" wx:for="{{logs}}" wx:key="index">
+        <view class="log-time">{{item.time}}</view>
+        <view class="log-message {{item.type}}">{{item.message}}</view>
+      </view>
+      <view class="no-logs" wx:if="{{logs.length === 0}}">
+        <text class="no-logs-text">暂无日志</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据统计 -->
+  <view class="stats-section">
+    <view class="section-header">
+      <text class="section-title">数据统计</text>
+    </view>
+    <view class="stats-card">
+      <view class="stat-item">
+        <text class="stat-label">总菜谱数</text>
+        <text class="stat-value">{{stats.totalRecipes || 0}}</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-label">推荐菜谱</text>
+        <text class="stat-value">{{stats.featuredRecipes || 0}}</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-label">分类数量</text>
+        <text class="stat-value">{{stats.categories || 0}}</text>
+      </view>
+    </view>
+  </view>
+</view>

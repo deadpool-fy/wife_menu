@@ -1,74 +1,131 @@
 <!--pages/category/category.wxml-->
 <view class="container">
   <!-- 分类标签区域 -->
-  <view class="category-tabs">
-    <scroll-view class="tabs-scroll" scroll-x="true">
+  <view class="category-tabs glass-card">
+    <view class="tabs-header">
+      <view class="tabs-title">
+        <view class="title-icon">🍽️</view>
+        <text>菜品分类</text>
+      </view>
+      <view class="tabs-count">{{filteredDishes.length}}道菜</view>
+    </view>
+    <scroll-view class="tabs-scroll" scroll-x="true" show-scrollbar="{{false}}">
       <view class="tab-item {{currentCategory === 'all' ? 'active' : ''}}" 
             bindtap="switchCategory" data-category="all">
-        全部
+        <view class="tab-icon">🍽️</view>
+        <text>全部</text>
       </view>
       <view class="tab-item {{currentCategory === 'meat' ? 'active' : ''}}" 
             bindtap="switchCategory" data-category="meat">
-        荤菜
+        <view class="tab-icon">🥩</view>
+        <text>荤菜</text>
       </view>
       <view class="tab-item {{currentCategory === 'vegetable' ? 'active' : ''}}" 
             bindtap="switchCategory" data-category="vegetable">
-        素菜
+        <view class="tab-icon">🥬</view>
+        <text>素菜</text>
       </view>
       <view class="tab-item {{currentCategory === 'mixed' ? 'active' : ''}}" 
             bindtap="switchCategory" data-category="mixed">
-        荤素搭配
+        <view class="tab-icon">🥘</view>
+        <text>荤素搭配</text>
       </view>
       <view class="tab-item {{currentCategory === 'soup' ? 'active' : ''}}" 
             bindtap="switchCategory" data-category="soup">
-        汤类
+        <view class="tab-icon">🍲</view>
+        <text>汤类</text>
       </view>
       <view class="tab-item {{currentCategory === 'dessert' ? 'active' : ''}}" 
             bindtap="switchCategory" data-category="dessert">
-        甜品
+        <view class="tab-icon">🍰</view>
+        <text>甜品</text>
       </view>
     </scroll-view>
   </view>
 
   <!-- 菜品网格区域 -->
   <view class="dishes-grid">
-    <view class="dish-card" wx:for="{{filteredDishes}}" wx:key="id" 
-          bindtap="goToDetail" data-dish="{{item}}">
-      <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
-      <view class="dish-info">
-        <view class="dish-name">{{item.name}}</view>
-        <view class="dish-meta">
-          <text class="category-tag">{{item.category}}</text>
-          <text class="difficulty-tag">{{item.difficulty}}</text>
+    <view class="dish-card hover-lift scale-in" 
+          wx:for="{{filteredDishes}}" 
+          wx:key="id"
+          style="animation-delay: {{index * 0.1}}s"
+          bindtap="goToDetail" 
+          data-dish="{{item}}">
+      <view class="dish-image-container">
+        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="dish-badge" wx:if="{{item.isNew}}">新品</view>
+        <view class="dish-favorite" wx:if="{{item.isFavorite}}">❤️</view>
+        <view class="dish-overlay">
+          <view class="overlay-content">
+            <view class="dish-name">{{item.name}}</view>
+            <view class="dish-category">{{item.category}}</view>
+          </view>
         </view>
-        <view class="dish-stats">
-          <text class="time-text">{{item.cookingTime}}</text>
-          <text class="servings-text">{{item.servings}}人份</text>
+      </view>
+      <view class="dish-info">
+        <view class="dish-meta">
+          <view class="meta-item">
+            <text class="meta-icon">⏱️</text>
+            <text class="meta-text">{{item.cookingTime}}</text>
+          </view>
+          <view class="meta-item">
+            <text class="meta-icon">👥</text>
+            <text class="meta-text">{{item.servings}}人份</text>
+          </view>
+        </view>
+        <view class="dish-tags">
+          <view class="tag difficulty-tag">{{item.difficulty}}</view>
+          <view class="tag category-tag">{{item.category}}</view>
         </view>
       </view>
       <view class="dish-actions">
         <view class="action-btn {{item.selected ? 'selected' : ''}}" 
-              bindtap="toggleSelect" data-dish="{{item}}" catchtap="true">
-          {{item.selected ? '已选' : '选择'}}
+              bindtap="toggleSelect" 
+              data-dish="{{item}}" 
+              catchtap="true">
+          <view class="btn-icon">{{item.selected ? '✓' : '+'}}</view>
+          <text>{{item.selected ? '已选' : '选择'}}</text>
         </view>
       </view>
     </view>
   </view>
 
   <!-- 空状态 -->
-  <view class="empty-state" wx:if="{{filteredDishes.length === 0}}">
-    <image class="empty-image" src="/images/empty.png" mode="aspectFit"></image>
-    <view class="empty-text">暂无{{categoryName}}菜品</view>
-    <view class="empty-desc">试试其他分类吧</view>
+  <view class="empty-state fade-in" wx:if="{{filteredDishes.length === 0}}">
+    <view class="empty-content">
+      <view class="empty-icon">🍽️</view>
+      <view class="empty-text">暂无{{categoryName}}菜品</view>
+      <view class="empty-desc">试试其他分类吧</view>
+      <view class="empty-actions">
+        <view class="empty-btn" bindtap="switchCategory" data-category="all">
+          <view class="btn-icon">🔄</view>
+          <text>查看全部</text>
+        </view>
+      </view>
+    </view>
   </view>
 
   <!-- 底部操作区域 -->
-  <view class="bottom-actions" wx:if="{{selectedCount > 0}}">
-    <view class="selected-info">
-      <text>已选择 {{selectedCount}} 道菜</text>
+  <view class="bottom-actions slide-up" wx:if="{{selectedCount > 0}}">
+    <view class="actions-content">
+      <view class="selected-info">
+        <view class="info-icon">✅</view>
+        <view class="info-text">
+          <text class="info-count">已选择 {{selectedCount}} 道菜</text>
+          <text class="info-desc">准备发送给老公</text>
+        </view>
+      </view>
+      <button class="btn btn-primary btn-lg" bindtap="goToMenu">
+        <view class="btn-content">
+          <view class="btn-icon">📋</view>
+          <text>查看菜单</text>
+        </view>
+      </button>
     </view>
-    <button class="btn btn-primary" bindtap="goToMenu">
-      查看菜单
-    </button>
+    <view class="actions-decoration">
+      <view class="decoration-dot"></view>
+      <view class="decoration-dot"></view>
+      <view class="decoration-dot"></view>
+    </view>
   </view>
 </view>

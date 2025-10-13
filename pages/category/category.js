@@ -1,5 +1,6 @@
 // pages/category/category.js
 const app = getApp()
+const cloudApiService = require('../../utils/cloudApi.js')
 
 Page({
   data: {
@@ -7,7 +8,17 @@ Page({
     categoryName: '全部',
     allDishes: [],
     filteredDishes: [],
-    selectedCount: 0
+    selectedCount: 0,
+    loading: false,
+    error: null,
+    categories: [
+      { id: 'all', name: '全部', icon: '🍽️' },
+      { id: 'meat', name: '荤菜', icon: '🥩' },
+      { id: 'vegetable', name: '素菜', icon: '🥬' },
+      { id: 'mixed', name: '荤素搭配', icon: '🥘' },
+      { id: 'soup', name: '汤类', icon: '🍲' },
+      { id: 'dessert', name: '甜品', icon: '🍰' }
+    ]
   },
 
   onLoad() {
@@ -21,9 +32,80 @@ Page({
   },
 
   // 加载所有菜品数据
-  loadAllDishes() {
-    // 这里应该从服务器获取菜品数据，现在使用模拟数据
-    const mockDishes = [
+  async loadAllDishes() {
+    this.setData({ loading: true, error: null })
+    
+    try {
+      // 从云开发获取所有菜品
+      const response = await cloudApiService.getRecipes({ 
+        page: 1, 
+        limit: 100
+      })
+      
+      if (response.success) {
+        // 转换数据格式以适配小程序
+        const allDishes = response.data.recipes.map(recipe => ({
+          id: recipe._id,
+          name: recipe.title,
+          category: recipe.category,
+          categoryType: this.getCategoryType(recipe.category),
+          difficulty: recipe.difficulty,
+          cookingTime: recipe.cookingTime,
+          servings: recipe.servings,
+          calories: recipe.calories,
+          rating: recipe.rating,
+          likeCount: recipe.likeCount,
+          image: recipe.image || '/images/default-dish.png',
+          selected: false
+        }))
+        
+        this.setData({
+          allDishes: allDishes,
+          filteredDishes: allDishes,
+          loading: false
+        })
+        
+        // 更新选中状态
+        this.updateSelectedStatus()
+      } else {
+        throw new Error(response.message || '获取菜品数据失败')
+      }
+    } catch (error) {
+      console.error('加载菜品数据失败:', error)
+      
+      // 如果云开发失败，使用本地数据作为备用
+      const mockDishes = this.getMockDishes()
+      
+      this.setData({
+        allDishes: mockDishes,
+        filteredDishes: mockDishes,
+        loading: false,
+        error: '网络连接失败，已加载本地数据'
+      })
+      
+      wx.showToast({
+        title: '网络连接失败，已加载本地数据',
+        icon: 'none',
+        duration: 2000
+      })
+    }
+  },
+
+  // 获取分类类型映射
+  getCategoryType(category) {
+    const categoryMap = {
+      '荤菜': 'meat',
+      '素菜': 'vegetable', 
+      '荤素搭配': 'mixed',
+      '汤类': 'soup',
+      '甜品': 'dessert'
+    }
+    return categoryMap[category] || 'mixed'
+  },
+
+  // 获取模拟数据（备用）
+  getMockDishes() {
+    return [
       {
         id: 1,
         name: '宫保鸡丁',
@@ -135,11 +217,6 @@ Page({
         selected: false
       }
     ]
-
-    this.setData({
-      allDishes: mockDishes,
-      filteredDishes: mockDishes
-    })
   },
 
   // 加载已选择的菜品

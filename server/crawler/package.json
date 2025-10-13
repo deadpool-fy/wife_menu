@@ -1,0 +1,31 @@
+{
+  "name": "xiaohongshu-crawler",
+  "version": "1.0.0",
+  "description": "小红书菜谱数据爬虫服务",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "crawl": "node crawler.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.5.2",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "mysql2": "^3.6.5",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.11.0",
+    "joi": "^17.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": ["crawler", "xiaohongshu", "recipe", "food"],
+  "author": "Your Name",
+  "license": "MIT"
+}

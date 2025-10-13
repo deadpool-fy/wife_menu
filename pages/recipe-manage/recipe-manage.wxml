@@ -1,0 +1,136 @@
+<!--菜谱管理页面-->
+<view class="recipe-manage-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <view class="header-title">菜谱管理</view>
+    <view class="header-subtitle">管理您的菜谱库</view>
+  </view>
+
+  <!-- 统计信息 -->
+  <view class="stats-container">
+    <view class="stat-item">
+      <view class="stat-number">{{stats.totalRecipes}}</view>
+      <view class="stat-label">总菜谱数</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-number">{{stats.totalCategories}}</view>
+      <view class="stat-label">分类数</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-number">{{stats.recentRecipes.length}}</view>
+      <view class="stat-label">最近添加</view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="action-btn primary" bindtap="addRecipe">
+      <view class="btn-icon">+</view>
+      <view class="btn-text">添加菜谱</view>
+    </button>
+    <button class="action-btn secondary" bindtap="refreshData">
+      <view class="btn-icon">🔄</view>
+      <view class="btn-text">刷新数据</view>
+    </button>
+  </view>
+
+  <!-- 筛选器 -->
+  <view class="filter-container">
+    <view class="filter-item">
+      <picker 
+        class="filter-picker" 
+        range="{{categories}}" 
+        range-key="name"
+        value="{{filterCategoryIndex}}"
+        bindchange="onCategoryFilterChange"
+      >
+        <view class="picker-text">
+          {{filterCategoryIndex >= 0 ? categories[filterCategoryIndex].name : '全部分类'}}
+        </view>
+      </picker>
+    </view>
+    <view class="filter-item">
+      <picker 
+        class="filter-picker" 
+        range="{{difficulties}}" 
+        value="{{filterDifficultyIndex}}"
+        bindchange="onDifficultyFilterChange"
+      >
+        <view class="picker-text">
+          {{filterDifficultyIndex >= 0 ? difficulties[filterDifficultyIndex] : '全部难度'}}
+        </view>
+      </picker>
+    </view>
+    <view class="filter-item">
+      <input 
+        class="filter-input" 
+        placeholder="搜索菜谱" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+      />
+    </view>
+  </view>
+
+  <!-- 菜谱列表 -->
+  <view class="recipes-container">
+    <view class="recipes-list" wx:if="{{recipes.length > 0}}">
+      <view class="recipe-item" wx:for="{{recipes}}" wx:key="_id">
+        <view class="recipe-image">
+          <image src="{{item.image}}" mode="aspectFill" class="recipe-img"></image>
+        </view>
+        <view class="recipe-content">
+          <view class="recipe-title">{{item.title}}</view>
+          <view class="recipe-description">{{item.description}}</view>
+          <view class="recipe-meta">
+            <view class="meta-item">
+              <text class="meta-label">分类:</text>
+              <text class="meta-value">{{item.category}}</text>
+            </view>
+            <view class="meta-item">
+              <text class="meta-label">难度:</text>
+              <text class="meta-value">{{item.difficulty}}</text>
+            </view>
+            <view class="meta-item">
+              <text class="meta-label">时间:</text>
+              <text class="meta-value">{{item.cookingTime}}</text>
+            </view>
+          </view>
+          <view class="recipe-tags">
+            <text class="tag" wx:for="{{item.tags}}" wx:key="index" wx:for-item="tag">
+              {{tag}}
+            </text>
+          </view>
+        </view>
+        <view class="recipe-actions">
+          <button class="action-btn-small edit" bindtap="editRecipe" data-id="{{item._id}}">
+            编辑
+          </button>
+          <button class="action-btn-small delete" bindtap="deleteRecipe" data-id="{{item._id}}">
+            删除
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">📝</view>
+      <view class="empty-text">暂无菜谱</view>
+      <view class="empty-subtitle">点击上方按钮添加第一个菜谱</view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore && recipes.length > 0}}">
+    <button class="load-more-btn" bindtap="loadMore" disabled="{{isLoading}}">
+      {{isLoading ? '加载中...' : '加载更多'}}
+    </button>
+  </view>
+
+  <!-- 分页信息 -->
+  <view class="pagination-info" wx:if="{{recipes.length > 0}}">
+    <text>第 {{currentPage}} 页，共 {{totalPages}} 页</text>
+  </view>
+</view>
+

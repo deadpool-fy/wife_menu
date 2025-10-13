@@ -1,0 +1,243 @@
+/* 后台管理页面样式 */
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20rpx;
+}
+
+/* 头部 */
+.admin-header {
+  margin-bottom: 30rpx;
+}
+
+.header-content {
+  text-align: center;
+  color: white;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15rpx;
+  margin-bottom: 10rpx;
+}
+
+.title-icon {
+  font-size: 48rpx;
+}
+
+.title-text {
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  opacity: 0.8;
+}
+
+/* 分组标题 */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: white;
+}
+
+.refresh-btn {
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+
+/* 菜谱管理 */
+.recipe-management-section,
+.system-management-section,
+.data-cleanup-section {
+  margin-bottom: 30rpx;
+}
+
+.management-card,
+.system-card,
+.cleanup-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.management-btn,
+.system-btn,
+.cleanup-btn {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 30rpx;
+  border-radius: 15rpx;
+  border: none;
+  font-size: 28rpx;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.management-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.management-btn.secondary {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+}
+
+.system-btn.info {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+}
+
+.system-btn.success {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  color: white;
+}
+
+.cleanup-btn.danger {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+}
+
+.cleanup-btn.warning {
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+}
+
+.btn-icon {
+  font-size: 32rpx;
+  margin-bottom: 10rpx;
+}
+
+.btn-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 5rpx;
+}
+
+.btn-desc {
+  font-size: 22rpx;
+  opacity: 0.8;
+}
+
+/* 日志 */
+.logs-section {
+  margin-bottom: 30rpx;
+}
+
+.logs-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+  max-height: 400rpx;
+  overflow-y: auto;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.log-item:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  font-size: 22rpx;
+  color: #999;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.log-message {
+  font-size: 24rpx;
+  flex: 1;
+  word-break: break-all;
+}
+
+.log-message.success {
+  color: #2ecc71;
+}
+
+.log-message.error {
+  color: #e74c3c;
+}
+
+.log-message.warning {
+  color: #f39c12;
+}
+
+.log-message.info {
+  color: #3498db;
+}
+
+.no-logs {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+}
+
+.no-logs-text {
+  font-size: 26rpx;
+}
+
+/* 统计信息 */
+.stats-section {
+  margin-bottom: 30rpx;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.stat-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #667eea;
+}

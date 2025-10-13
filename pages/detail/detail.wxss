@@ -1,26 +1,10 @@
 /* pages/detail/detail.wxss */
 .container {
   padding: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--background-primary);
   min-height: 100vh;
   padding-bottom: 120rpx;
   position: relative;
-}
-
-/* 背景装饰 */
-.container::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* 菜品头部区域 */
@@ -33,6 +17,11 @@
 .dish-image {
   width: 100%;
   height: 100%;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.dish-header:hover .dish-image {
+  transform: scale(1.05);
 }
 
 .dish-overlay {
@@ -40,154 +29,293 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  padding: 40rpx 30rpx 30rpx;
-  color: white;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  padding: var(--space-xl) var(--space-lg) var(--space-lg);
+  color: var(--text-white);
 }
 
 .dish-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  margin-bottom: 20rpx;
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  margin-bottom: var(--space-lg);
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
 }
 
 .dish-meta {
   display: flex;
-  gap: 20rpx;
+  gap: var(--space-md);
+  flex-wrap: wrap;
 }
 
-.category-tag, .calories-tag, .time-tag {
-  padding: 8rpx 16rpx;
-  border-radius: 20rpx;
-  font-size: 22rpx;
-  background-color: rgba(255, 255, 255, 0.2);
+.meta-tag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-sm);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10rpx);
+  -webkit-backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.meta-tag:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2rpx);
+}
+
+.tag-icon {
+  font-size: var(--text-sm);
+}
+
+.header-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.decoration-circle {
+  position: absolute;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  animation: float 8s ease-in-out infinite;
+}
+
+.circle-1 {
+  width: 100rpx;
+  height: 100rpx;
+  top: 20rpx;
+  right: 40rpx;
+  animation-delay: 0s;
+}
+
+.circle-2 {
+  width: 60rpx;
+  height: 60rpx;
+  bottom: 40rpx;
+  left: 30rpx;
+  animation-delay: 4s;
 }
 
 /* 菜品信息区域 */
 .dish-info-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10rpx);
-  margin: 20rpx;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  margin: var(--space-lg);
+  padding: var(--space-xl);
   position: relative;
   z-index: 1;
 }
 
+.section-header {
+  margin-bottom: var(--space-lg);
+}
+
 .section-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20rpx;
-  padding-bottom: 10rpx;
-  border-bottom: 2rpx solid #ff6b6b;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 2rpx solid var(--primary-color);
+}
+
+.title-icon {
+  font-size: var(--text-lg);
 }
 
 .dish-description {
-  font-size: 26rpx;
+  font-size: var(--text-base);
   line-height: 1.6;
-  color: #666;
-  margin-bottom: 30rpx;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
+  gap: var(--space-lg);
 }
 
 .info-item {
-  text-align: center;
-  padding: 20rpx;
-  background-color: #f8f9fa;
-  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(10rpx);
+  -webkit-backdrop-filter: blur(10rpx);
+  border-radius: var(--radius-lg);
+  border: 1rpx solid var(--glass-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.info-item:hover {
+  transform: translateY(-2rpx);
+  box-shadow: var(--shadow-md);
+}
+
+.info-icon {
+  font-size: var(--text-xl);
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-full);
+  color: var(--text-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.info-content {
+  flex: 1;
 }
 
 .info-label {
-  font-size: 22rpx;
-  color: #999;
-  margin-bottom: 8rpx;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
 }
 
 .info-value {
-  font-size: 26rpx;
-  font-weight: bold;
-  color: #333;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 /* 食材清单 */
 .ingredients-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10rpx);
-  margin: 20rpx;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  margin: var(--space-lg);
+  padding: var(--space-xl);
   position: relative;
   z-index: 1;
+}
+
+.ingredients-count {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: rgba(40, 167, 69, 0.1);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  margin-left: var(--space-sm);
 }
 
 .ingredients-list {
   display: flex;
   flex-direction: column;
-  gap: 15rpx;
+  gap: var(--space-md);
 }
 
 .ingredient-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20rpx;
-  background-color: #f8f9fa;
-  border-radius: 8rpx;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(10rpx);
+  -webkit-backdrop-filter: blur(10rpx);
+  border-radius: var(--radius-lg);
+  border: 1rpx solid var(--glass-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.ingredient-item:hover {
+  transform: translateY(-2rpx);
+  box-shadow: var(--shadow-md);
+}
+
+.ingredient-icon {
+  font-size: var(--text-xl);
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--success-gradient);
+  border-radius: var(--radius-full);
+  color: var(--text-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.ingredient-content {
+  flex: 1;
 }
 
 .ingredient-name {
-  font-size: 26rpx;
-  color: #333;
-  font-weight: 500;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
 }
 
 .ingredient-amount {
-  font-size: 24rpx;
-  color: #666;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.ingredient-check {
+  font-size: var(--text-lg);
+  color: var(--success-color);
+  font-weight: bold;
+  opacity: 0.6;
 }
 
 /* 制作步骤 */
 .steps-section {
-  background-color: white;
-  margin: 20rpx;
-  border-radius: 12rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin: var(--space-lg);
+  padding: var(--space-xl);
+  position: relative;
+  z-index: 1;
+}
+
+.steps-count {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  background: rgba(255, 107, 107, 0.1);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  margin-left: var(--space-sm);
 }
 
 .steps-list {
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
+  gap: var(--space-xl);
 }
 
 .step-item {
   display: flex;
-  gap: 20rpx;
+  gap: var(--space-lg);
+  align-items: flex-start;
 }
 
 .step-number {
   width: 60rpx;
   height: 60rpx;
-  background-color: #ff6b6b;
-  color: white;
-  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: var(--text-white);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
-  font-weight: bold;
+  font-size: var(--text-base);
+  font-weight: 700;
   flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.step-item:hover .step-number {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .step-content {
@@ -195,35 +323,53 @@
 }
 
 .step-description {
-  font-size: 26rpx;
+  font-size: var(--text-base);
   line-height: 1.6;
-  color: #333;
-  margin-bottom: 15rpx;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
 }
 
 .step-image {
   width: 100%;
   height: 200rpx;
-  border-radius: 8rpx;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.step-image:hover {
+  transform: scale(1.02);
 }
 
 /* 小贴士 */
 .tips-section {
-  background-color: white;
-  margin: 20rpx;
-  border-radius: 12rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  margin: var(--space-lg);
+  padding: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 .tips-content {
-  font-size: 26rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  border-radius: var(--radius-lg);
+  border-left: 4rpx solid var(--warning-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.tips-icon {
+  font-size: var(--text-xl);
+  margin-top: var(--space-xs);
+}
+
+.tips-text {
+  font-size: var(--text-base);
   line-height: 1.6;
-  color: #666;
-  background-color: #fff3cd;
-  padding: 20rpx;
-  border-radius: 8rpx;
-  border-left: 4rpx solid #ffc107;
+  color: var(--text-primary);
+  flex: 1;
 }
 
 /* 底部操作区域 */
@@ -232,16 +378,59 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: white;
-  padding: 20rpx;
-  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.1);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-xl);
+  border-top: 1rpx solid var(--glass-border);
+  z-index: 10;
+}
+
+.actions-content {
   display: flex;
-  gap: 20rpx;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .bottom-actions .btn {
   flex: 1;
   height: 80rpx;
-  font-size: 26rpx;
-  border-radius: 40rpx;
+  font-size: var(--text-base);
+  border-radius: var(--radius-2xl);
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  height: 100%;
+}
+
+.btn-icon {
+  font-size: var(--text-base);
+}
+
+.actions-decoration {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.decoration-dot {
+  width: 8rpx;
+  height: 8rpx;
+  background: var(--primary-color);
+  border-radius: var(--radius-full);
+  opacity: 0.6;
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+.decoration-dot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.decoration-dot:nth-child(3) {
+  animation-delay: 1s;
 }

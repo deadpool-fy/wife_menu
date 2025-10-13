@@ -1,12 +1,14 @@
 // pages/detail/detail.js
 const app = getApp()
 const messageService = require('../../utils/messageService.js')
-const { getDishDetail } = require('../../data/dishes.js')
+const cloudApiService = require('../../utils/cloudApi.js')
 
 Page({
   data: {
     dishDetail: {},
-    isSelected: false
+    isSelected: false,
+    loading: false,
+    error: null
   },
 
   onLoad(options) {
@@ -21,22 +23,82 @@ Page({
   },
 
   // 加载菜品详情
-  loadDishDetail(dishId) {
-    // 从数据文件获取菜品详情
-    const dishDetail = getDishDetail(parseInt(dishId))
+  async loadDishDetail(dishId) {
+    this.setData({ loading: true, error: null })
     
-    if (dishDetail) {
-      this.setData({
-        dishDetail: dishDetail
-      })
-    } else {
-      wx.showToast({
-        title: '菜品不存在',
-        icon: 'none'
-      })
-      setTimeout(() => {
-        wx.navigateBack()
-      }, 1500)
+    try {
+      // 从云开发获取菜品详情
+      const response = await cloudApiService.getRecipeById(dishId)
+      
+      if (response.success && response.data) {
+        const recipe = response.data
+        
+        // 转换数据格式以适配小程序
+        const dishDetail = {
+          id: recipe._id,
+          name: recipe.title,
+          description: recipe.description,
+          image: recipe.image || '/images/default-dish.png',
+          category: recipe.category,
+          difficulty: recipe.difficulty,
+          cookingTime: recipe.cookingTime,
+          servings: recipe.servings,
+          calories: recipe.calories,
+          rating: recipe.rating,
+          likeCount: recipe.likeCount,
+          viewCount: recipe.viewCount,
+          ingredients: recipe.ingredients || [],
+          steps: recipe.steps || [],
+          tips: recipe.tips,
+          author: recipe.author,
+          sourceUrl: recipe.sourceUrl,
+          tags: recipe.tags || []
+        }
+        
+        this.setData({
+          dishDetail: dishDetail,
+          loading: false
+        })
+        
+        // 检查选中状态
+        this.checkSelectedStatus()
+      } else {
+        throw new Error(response.message || '菜品不存在')
+      }
+    } catch (error) {
+      console.error('加载菜品详情失败:', error)
+      
+      // 如果云开发失败，使用本地数据作为备用
+      const { getDishDetail } = require('../../data/dishes.js')
+      const fallbackDetail = getDishDetail(parseInt(dishId))
+      
+      if (fallbackDetail) {
+        this.setData({
+          dishDetail: fallbackDetail,
+          loading: false,
+          error: '网络连接失败，已加载本地数据'
+        })
+        
+        wx.showToast({
+          title: '网络连接失败，已加载本地数据',
+          icon: 'none',
+          duration: 2000
+        })
+      } else {
+        this.setData({
+          loading: false,
+          error: '菜品不存在'
+        })
+        
+        wx.showToast({
+          title: '菜品不存在',
+          icon: 'none'
+        })
+        
+        setTimeout(() => {
+          wx.navigateBack()
+        }, 1500)
+      }
     }
   },
 
