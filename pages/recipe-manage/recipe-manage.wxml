@@ -1,23 +1,30 @@
 <view class="page-shell">
   <view class="hero-card rise-enter">
-    <view class="hero-eyebrow">
-      <text>CONTENT LIBRARY</text>
-      <text>菜谱管理</text>
-    </view>
-    <view class="hero-title">把菜谱库管理成资产，而不是一堆散落数据。</view>
-    <view class="hero-subtitle">这里统一查看统计、筛选内容、预览详情和删除无效数据，让后台维护真正有秩序。</view>
-    <view class="hero-metrics">
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.totalRecipes || 0}}</text>
-        <text class="hero-metric-label">总菜谱数</text>
+    <view class="hero-layout">
+      <view class="hero-copy">
+        <view class="hero-eyebrow">
+          <text>CONTENT LIBRARY</text>
+          <text>菜谱管理</text>
+        </view>
+        <view class="hero-title">把菜谱库管理成资产，而不是一堆散落数据。</view>
+        <view class="hero-subtitle">这里统一查看统计、筛选内容、预览详情和删除无效数据，让后台维护真正有秩序。</view>
+        <view class="hero-metrics">
+          <view class="hero-metric">
+            <text class="hero-metric-value">{{stats.totalRecipes || 0}}</text>
+            <text class="hero-metric-label">总菜谱数</text>
+          </view>
+          <view class="hero-metric">
+            <text class="hero-metric-value">{{stats.totalCategories || 0}}</text>
+            <text class="hero-metric-label">分类数</text>
+          </view>
+        </view>
       </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.totalCategories || 0}}</text>
-        <text class="hero-metric-label">分类数</text>
-      </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.recentRecipes.length || 0}}</text>
-        <text class="hero-metric-label">近期新增</text>
+      <view class="hero-side">
+        <view class="hero-side-card">
+          <text class="hero-side-label">RECENT</text>
+          <text class="hero-side-value">{{stats.recentRecipes.length || 0}}</text>
+          <text class="hero-side-meta">最近新增内容，适合优先检查质量和完整度。</text>
+        </view>
       </view>
     </view>
   </view>
@@ -43,6 +50,7 @@
         <text class="section-subtitle">快速缩小范围，避免内容一多就完全失控。</text>
       </view>
     </view>
+    <view class="lux-divider"></view>
     <view class="filter-stack">
       <picker range="{{categories}}" range-key="name" value="{{filterCategoryIndex}}" bindchange="onCategoryFilterChange">
         <view class="picker-box">

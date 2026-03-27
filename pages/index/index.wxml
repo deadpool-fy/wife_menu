@@ -1,23 +1,35 @@
 <view class="page-shell">
   <view class="hero-card rise-enter">
-    <view class="hero-eyebrow">
-      <text>DINNER STUDIO</text>
-      <text>{{currentDate}}</text>
-    </view>
-    <view class="hero-title">把今天这顿饭，选得像精心策划过一样。</view>
-    <view class="hero-subtitle">{{heroTip}}</view>
-    <view class="hero-metrics">
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{recommendDishes.length}}</text>
-        <text class="hero-metric-label">今日推荐</text>
+    <view class="hero-layout">
+      <view class="hero-copy">
+        <view class="hero-eyebrow">
+          <text>DINNER STUDIO</text>
+          <text>{{currentDate}}</text>
+        </view>
+        <view class="hero-title">把今天这顿饭，选得像精心策划过一样。</view>
+        <view class="hero-subtitle">{{heroTip}}</view>
+        <view class="hero-metrics">
+          <view class="hero-metric">
+            <text class="hero-metric-value">{{recommendDishes.length}}</text>
+            <text class="hero-metric-label">今日推荐</text>
+          </view>
+          <view class="hero-metric">
+            <text class="hero-metric-value">{{selectedDishes.length}}</text>
+            <text class="hero-metric-label">已选菜单</text>
+          </view>
+        </view>
       </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{selectedDishes.length}}</text>
-        <text class="hero-metric-label">已选菜单</text>
-      </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">NOW</text>
-        <text class="hero-metric-label">{{todayMood}}</text>
+      <view class="hero-side">
+        <view class="hero-side-card">
+          <text class="hero-side-label">CURATOR NOTE</text>
+          <text class="hero-side-value">NOW</text>
+          <text class="hero-side-meta">{{todayMood}}</text>
+        </view>
+        <view class="hero-side-card">
+          <text class="hero-side-label">SERVICE</text>
+          <text class="hero-side-value">01</text>
+          <text class="hero-side-meta">从推荐、搭配到发送，一屏完成今晚菜单。</text>
+        </view>
       </view>
     </view>
   </view>
@@ -58,6 +70,7 @@
         <view class="ghost-btn action-pill" bindtap="refreshRecommend">换一批</view>
       </view>
     </view>
+    <view class="lux-divider"></view>
 
     <view class="feedback-banner" wx:if="{{error}}">
       <text>{{error}}</text>

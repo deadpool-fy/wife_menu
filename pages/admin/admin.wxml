@@ -1,27 +1,35 @@
 <view class="page-shell">
   <view class="hero-card rise-enter">
-    <view class="hero-eyebrow">
-      <text>CONTROL ROOM</text>
-      <text>后台工作台</text>
-    </view>
-    <view class="hero-title">把后台也做得像产品，而不是临时工具箱。</view>
-    <view class="hero-subtitle">这里统一承接菜谱维护、系统检测和高风险数据操作，让管理流程也有稳定清晰的节奏。</view>
-    <view class="hero-metrics">
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.totalRecipes}}</text>
-        <text class="hero-metric-label">总菜谱数</text>
+    <view class="hero-layout">
+      <view class="hero-copy">
+        <view class="hero-eyebrow">
+          <text>CONTROL ROOM</text>
+          <text>后台工作台</text>
+        </view>
+        <view class="hero-title">把后台也做得像产品，而不是临时工具箱。</view>
+        <view class="hero-subtitle">这里统一承接菜谱维护、系统检测和高风险数据操作，让管理流程也有稳定清晰的节奏。</view>
+        <view class="hero-metrics">
+          <view class="hero-metric">
+            <text class="hero-metric-value">{{stats.totalRecipes}}</text>
+            <text class="hero-metric-label">总菜谱数</text>
+          </view>
+          <view class="hero-metric">
+            <text class="hero-metric-value">{{stats.totalCategories}}</text>
+            <text class="hero-metric-label">分类数量</text>
+          </view>
+        </view>
       </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.featuredRecipes}}</text>
-        <text class="hero-metric-label">近期重点</text>
-      </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.totalCategories}}</text>
-        <text class="hero-metric-label">分类数量</text>
-      </view>
-      <view class="hero-metric">
-        <text class="hero-metric-value">{{stats.pendingImports}}</text>
-        <text class="hero-metric-label">待审核导入</text>
+      <view class="hero-side">
+        <view class="hero-side-card">
+          <text class="hero-side-label">REVIEW</text>
+          <text class="hero-side-value">{{stats.pendingImports}}</text>
+          <text class="hero-side-meta">待审核导入草稿，适合今天优先处理。</text>
+        </view>
+        <view class="hero-side-card">
+          <text class="hero-side-label">FOCUS</text>
+          <text class="hero-side-value">{{stats.featuredRecipes}}</text>
+          <text class="hero-side-meta">近期重点内容，方便你快速回看当前更新节奏。</text>
+        </view>
       </view>
     </view>
   </view>
@@ -34,6 +42,7 @@
         <text class="section-subtitle">常用动作放在同一屏，新增和管理不再来回找入口。</text>
       </view>
     </view>
+    <view class="lux-divider"></view>
     <view class="console-grid two-col">
       <view class="console-card accent-card" bindtap="goToRecipeManage">
         <text class="console-tag">MANAGE</text>

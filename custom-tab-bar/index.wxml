@@ -1,0 +1,32 @@
+﻿<view class="tab-shell">
+  <view class="tab-bar">
+    <view
+      class="tab-item {{selected === index ? 'is-active' : ''}}"
+      wx:for="{{list}}"
+      wx:key="pagePath"
+      data-index="{{index}}"
+      data-path="{{item.pagePath}}"
+      bindtap="switchTab"
+    >
+      <view class="tab-pill">
+        <view class="tab-icon-wrap">
+          <view wx:if="{{item.iconType === 'menu'}}" class="icon-menu">
+            <view class="icon-menu-line line-top"></view>
+            <view class="icon-menu-line line-mid"></view>
+            <view class="icon-menu-line line-bottom"></view>
+          </view>
+          <view wx:elif="{{item.iconType === 'grid'}}" class="icon-grid">
+            <view class="icon-grid-cell"></view>
+            <view class="icon-grid-cell"></view>
+            <view class="icon-grid-cell"></view>
+            <view class="icon-grid-cell"></view>
+          </view>
+        </view>
+        <view class="tab-copy">
+          <text class="tab-label">{{item.text}}</text>
+          <text class="tab-sub">{{item.subtext}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

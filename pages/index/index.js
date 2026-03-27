@@ -1,4 +1,4 @@
-const app = getApp()
+﻿const app = getApp()
 const messageService = require('../../utils/messageService.js')
 const cloudApiService = require('../../utils/cloudApi.js')
 
@@ -22,6 +22,13 @@ Page({
   onShow() {
     this.loadSelectedDishes()
     this.updateRecommendDishes()
+    this.syncTabBar()
+  },
+
+  syncTabBar() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setSelected(0)
+    }
   },
 
   setCurrentDate() {

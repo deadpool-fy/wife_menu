@@ -1,0 +1,136 @@
+.tab-shell {
+  position: fixed;
+  left: 16rpx;
+  right: 16rpx;
+  bottom: 18rpx;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 16rpx;
+  padding: 14rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 248, 241, 0.94);
+  border: 1rpx solid rgba(255, 255, 255, 0.76);
+  box-shadow: 0 18rpx 42rpx rgba(125, 68, 38, 0.14);
+  backdrop-filter: blur(24rpx);
+  -webkit-backdrop-filter: blur(24rpx);
+  pointer-events: auto;
+}
+
+.tab-item {
+  flex: 1;
+}
+
+.tab-pill {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  min-height: 92rpx;
+  padding: 0 20rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1rpx solid transparent;
+  box-sizing: border-box;
+  transition: all 0.22s ease;
+}
+
+.tab-icon-wrap {
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 16rpx;
+  background: rgba(217, 93, 57, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tab-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tab-label {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a2b1d;
+  line-height: 1.15;
+}
+
+.tab-sub {
+  margin-top: 6rpx;
+  font-size: 18rpx;
+  color: #bb8e79;
+  line-height: 1;
+  letter-spacing: 1rpx;
+  text-transform: uppercase;
+}
+
+.icon-menu {
+  width: 30rpx;
+  height: 24rpx;
+  position: relative;
+}
+
+.icon-menu-line {
+  position: absolute;
+  left: 0;
+  height: 4rpx;
+  border-radius: 999rpx;
+  background: #ba5b34;
+}
+
+.line-top {
+  top: 0;
+  width: 30rpx;
+}
+
+.line-mid {
+  top: 10rpx;
+  width: 24rpx;
+}
+
+.line-bottom {
+  top: 20rpx;
+  width: 18rpx;
+}
+
+.icon-grid {
+  width: 28rpx;
+  height: 28rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rpx;
+}
+
+.icon-grid-cell {
+  background: #ba5b34;
+  border-radius: 5rpx;
+}
+
+.is-active .tab-pill {
+  background: linear-gradient(180deg, #de6a3d 0%, #b94224 100%);
+  border-color: rgba(255, 244, 236, 0.12);
+  box-shadow: 0 12rpx 28rpx rgba(185, 66, 36, 0.24);
+}
+
+.is-active .tab-icon-wrap {
+  background: rgba(255, 247, 240, 0.16);
+}
+
+.is-active .tab-label {
+  color: #fff8f1;
+}
+
+.is-active .tab-sub {
+  color: rgba(255, 248, 241, 0.72);
+}
+
+.is-active .icon-menu-line,
+.is-active .icon-grid-cell {
+  background: #fff8f1;
+}

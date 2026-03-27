@@ -19,18 +19,33 @@
   color: var(--text-inverse);
   min-height: 220rpx;
   box-sizing: border-box;
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.console-card::after {
+  content: "";
+  position: absolute;
+  right: -30rpx;
+  bottom: -40rpx;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .accent-card {
-  background: linear-gradient(145deg, #214033 0%, #163127 100%);
+  background: linear-gradient(160deg, #24362c 0%, #1a2a22 100%);
 }
 
 .mint-card {
-  background: linear-gradient(145deg, #7ea68a 0%, #5f8a6b 100%);
+  background: linear-gradient(160deg, #657a6f 0%, #53675d 100%);
 }
 
 .neutral-card {
-  background: linear-gradient(145deg, #d96b4d 0%, #bf5638 100%);
+  background: linear-gradient(160deg, #6c5948 0%, #564537 100%);
 }
 
 .console-tag {
@@ -43,7 +58,7 @@
 .console-title {
   display: block;
   margin-top: 18rpx;
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -65,8 +80,8 @@
 .danger-item {
   padding: 24rpx;
   border-radius: 28rpx;
-  border: 1rpx solid rgba(191, 86, 56, 0.18);
-  background: rgba(191, 86, 56, 0.06);
+  border: 1rpx solid rgba(127, 83, 56, 0.14);
+  background: rgba(157, 108, 77, 0.07);
 }
 
 .danger-title {
@@ -80,7 +95,7 @@
   display: block;
   margin-top: 10rpx;
   font-size: var(--font-sm);
-  color: #8a5a4d;
+  color: #775f4d;
   line-height: 1.6;
 }
 
@@ -96,7 +111,8 @@
   gap: 16rpx;
   padding: 20rpx;
   border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.52);
+  background: rgba(255, 255, 255, 0.46);
+  border: 1rpx solid rgba(124, 61, 35, 0.05);
 }
 
 .log-time {

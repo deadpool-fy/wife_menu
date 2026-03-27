@@ -46,7 +46,7 @@
   right: 0;
   bottom: 0;
   padding: 26rpx 20rpx 18rpx;
-  background: linear-gradient(180deg, transparent 0%, rgba(18, 28, 23, 0.82) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(76, 34, 24, 0.82) 100%);
 }
 
 .selected-name {
@@ -71,7 +71,7 @@
   width: 52rpx;
   height: 52rpx;
   border-radius: 50%;
-  background: rgba(18, 28, 23, 0.56);
+  background: rgba(88, 40, 27, 0.56);
   color: var(--text-inverse);
   text-align: center;
   line-height: 52rpx;
@@ -96,19 +96,20 @@
 .recommend-card {
   border-radius: 32rpx;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.56);
-  border: 1rpx solid rgba(31, 42, 36, 0.06);
+  background: rgba(255, 250, 245, 0.68);
+  border: 1rpx solid rgba(124, 61, 35, 0.06);
+  box-shadow: 0 14rpx 30rpx rgba(149, 81, 41, 0.08);
 }
 
 .recommend-main {
   display: flex;
   gap: 20rpx;
-  padding: 20rpx;
+  padding: 22rpx;
 }
 
 .recommend-image {
   width: 204rpx;
-  height: 204rpx;
+  height: 236rpx;
   border-radius: 26rpx;
   flex-shrink: 0;
 }
@@ -121,7 +122,7 @@
 .recommend-name {
   display: block;
   margin-top: 18rpx;
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.2;
@@ -139,13 +140,14 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12rpx;
-  margin-top: 20rpx;
+  margin-top: 22rpx;
 }
 
 .meta-block {
-  padding: 16rpx;
-  border-radius: 22rpx;
-  background: rgba(246, 241, 232, 0.92);
+  padding: 18rpx 16rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 245, 234, 0.92);
+  border: 1rpx solid rgba(124, 61, 35, 0.04);
 }
 
 .meta-label {
@@ -163,7 +165,7 @@
 }
 
 .recommend-action {
-  padding: 0 20rpx 20rpx;
+  padding: 0 22rpx 22rpx;
 }
 
 .action-select {
@@ -171,8 +173,8 @@
 }
 
 .action-select.selected {
-  background: linear-gradient(135deg, #7ea68a 0%, #5f8a6b 100%);
-  box-shadow: 0 16rpx 30rpx rgba(95, 138, 107, 0.22);
+  background: linear-gradient(180deg, #de6a3d 0%, #b94224 100%);
+  box-shadow: 0 12rpx 26rpx rgba(185, 66, 36, 0.22);
 }
 
 .empty-panel {

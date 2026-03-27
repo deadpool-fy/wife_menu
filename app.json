@@ -13,11 +13,12 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#214033",
-    "navigationBarTitleText": "家庭菜单",
+    "navigationBarTitleText": "晚餐手记",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f6f1e8"
   },
   "tabBar": {
+    "custom": true,
     "color": "#6f776f",
     "selectedColor": "#d96b4d",
     "backgroundColor": "#fffaf4",
@@ -25,13 +26,13 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "今日菜单",
+        "text": "今晚吃什么",
         "iconPath": "images/menu.png",
         "selectedIconPath": "images/menu-active.png"
       },
       {
         "pagePath": "pages/category/category",
-        "text": "灵感选菜",
+        "text": "找点灵感",
         "iconPath": "images/category.png",
         "selectedIconPath": "images/category-active.png"
       }

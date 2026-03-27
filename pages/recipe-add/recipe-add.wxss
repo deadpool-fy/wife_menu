@@ -29,7 +29,8 @@
   width: 100%;
   padding: 22rpx 24rpx;
   border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.56);
+  background: rgba(255, 255, 255, 0.44);
+  border: 1rpx solid rgba(124, 61, 35, 0.06);
   box-sizing: border-box;
   font-size: var(--font-sm);
   color: var(--text-primary);
@@ -42,7 +43,8 @@
 .image-panel {
   padding: 18rpx;
   border-radius: 30rpx;
-  background: rgba(255, 255, 255, 0.56);
+  background: rgba(255, 255, 255, 0.44);
+  border: 1rpx solid rgba(124, 61, 35, 0.05);
 }
 
 .cover-preview,
@@ -126,7 +128,7 @@
   width: 58rpx;
   height: 58rpx;
   border-radius: 18rpx;
-  background: rgba(191, 86, 56, 0.12);
+  background: rgba(157, 108, 77, 0.12);
   color: var(--surface-accent-strong);
   text-align: center;
   line-height: 58rpx;

@@ -1,4 +1,4 @@
-const app = getApp()
+﻿const app = getApp()
 const cloudApiService = require('../../utils/cloudApi.js')
 
 Page({
@@ -28,6 +28,13 @@ Page({
   onShow() {
     this.loadSelectedDishes()
     this.updateSelectedStatus()
+    this.syncTabBar()
+  },
+
+  syncTabBar() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setSelected(1)
+    }
   },
 
   async loadAllDishes() {
