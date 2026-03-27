@@ -1,166 +1,118 @@
-<!--pages/detail/detail.wxml-->
-<view class="container">
-  <!-- 菜品图片区域 -->
-  <view class="dish-header">
-    <image class="dish-image" src="{{dishDetail.image}}" mode="aspectFill"></image>
-    <view class="dish-overlay">
-      <view class="dish-title">{{dishDetail.name}}</view>
-      <view class="dish-meta">
-        <view class="meta-tag category-tag">
-          <text class="tag-icon">🍽️</text>
-          <text>{{dishDetail.category}}</text>
-        </view>
-        <view class="meta-tag calories-tag">
-          <text class="tag-icon">🔥</text>
-          <text>{{dishDetail.calories}}卡</text>
-        </view>
-        <view class="meta-tag time-tag">
-          <text class="tag-icon">⏱️</text>
-          <text>{{dishDetail.cookingTime}}</text>
-        </view>
+<view class="page-shell detail-shell">
+  <view class="detail-hero rise-enter">
+    <image class="detail-cover" src="{{dishDetail.image}}" mode="aspectFill"></image>
+    <view class="detail-mask"></view>
+    <view class="detail-copy">
+      <view class="hero-eyebrow">
+        <text>RECIPE NOTE</text>
+        <text>{{dishDetail.category}}</text>
       </view>
-    </view>
-    <view class="header-decoration">
-      <view class="decoration-circle circle-1"></view>
-      <view class="decoration-circle circle-2"></view>
-    </view>
-  </view>
-
-  <!-- 菜品信息区域 -->
-  <view class="dish-info-section glass-card fade-in">
-    <view class="section-header">
-      <view class="section-title">
-        <view class="title-icon">📝</view>
-        <text>菜品介绍</text>
-      </view>
-    </view>
-    <view class="dish-description">{{dishDetail.description}}</view>
-    
-    <view class="info-grid">
-      <view class="info-item">
-        <view class="info-icon">🔥</view>
-        <view class="info-content">
-          <view class="info-label">卡路里</view>
-          <view class="info-value">{{dishDetail.calories}}卡</view>
-        </view>
-      </view>
-      <view class="info-item">
-        <view class="info-icon">⏱️</view>
-        <view class="info-content">
-          <view class="info-label">制作时间</view>
-          <view class="info-value">{{dishDetail.cookingTime}}</view>
-        </view>
-      </view>
-      <view class="info-item">
-        <view class="info-icon">👥</view>
-        <view class="info-content">
-          <view class="info-label">适合人数</view>
-          <view class="info-value">{{dishDetail.servings}}人</view>
-        </view>
-      </view>
-      <view class="info-item">
-        <view class="info-icon">🍽️</view>
-        <view class="info-content">
-          <view class="info-label">菜品类型</view>
-          <view class="info-value">{{dishDetail.category}}</view>
-        </view>
+      <view class="detail-title">{{dishDetail.name}}</view>
+      <view class="detail-subtitle">{{dishDetail.description}}</view>
+      <view class="chip-row detail-chips">
+        <text class="chip">{{dishDetail.difficulty}}</text>
+        <text class="chip">{{dishDetail.cookingTime}}</text>
+        <text class="chip">{{dishDetail.servings}} 人份</text>
+        <text class="chip">{{dishDetail.calories}} kcal</text>
       </view>
     </view>
   </view>
 
-  <!-- 食材清单 -->
-  <view class="ingredients-section glass-card fade-in">
-    <view class="section-header">
-      <view class="section-title">
-        <view class="title-icon">🥬</view>
-        <text>食材清单</text>
-      </view>
-      <view class="ingredients-count">{{dishDetail.ingredients.length}}种食材</view>
+  <view class="surface-card section-shell fade-enter" wx:if="{{error}}">
+    <view class="feedback-banner">
+      <text>{{error}}</text>
     </view>
-    <view class="ingredients-list">
-      <view class="ingredient-item scale-in" 
-            wx:for="{{dishDetail.ingredients}}" 
-            wx:key="name"
-            style="animation-delay: {{index * 0.1}}s">
-        <view class="ingredient-icon">🥕</view>
-        <view class="ingredient-content">
-          <view class="ingredient-name">{{item.name}}</view>
-          <view class="ingredient-amount">{{item.amount}}</view>
-        </view>
-        <view class="ingredient-check">✓</view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">OVERVIEW</text>
+        <text class="section-title">关键信息</text>
+        <text class="section-subtitle">先看整体节奏，再决定今晚要不要把它加入菜单。</text>
+      </view>
+    </view>
+
+    <view class="overview-grid">
+      <view class="overview-item">
+        <text class="overview-label">烹饪难度</text>
+        <text class="overview-value">{{dishDetail.difficulty}}</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-label">制作时间</text>
+        <text class="overview-value">{{dishDetail.cookingTime}}</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-label">适合人数</text>
+        <text class="overview-value">{{dishDetail.servings}} 人</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-label">估算热量</text>
+        <text class="overview-value">{{dishDetail.calories}} kcal</text>
       </view>
     </view>
   </view>
 
-  <!-- 制作步骤 -->
-  <view class="steps-section glass-card fade-in">
-    <view class="section-header">
-      <view class="section-title">
-        <view class="title-icon">👨‍🍳</view>
-        <text>制作步骤</text>
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">INGREDIENTS</text>
+        <text class="section-title">食材清单</text>
+        <text class="section-subtitle">配料干净清晰一些，做饭时会更省脑子。</text>
       </view>
-      <view class="steps-count">{{dishDetail.steps.length}}个步骤</view>
+      <text class="result-count">{{dishDetail.ingredients.length}} 项</text>
     </view>
-    <view class="steps-list">
-      <view class="step-item scale-in" 
-            wx:for="{{dishDetail.steps}}" 
-            wx:key="step"
-            style="animation-delay: {{index * 0.1}}s">
-        <view class="step-number">{{index + 1}}</view>
-        <view class="step-content">
-          <view class="step-description">{{item.description}}</view>
+
+    <view class="ingredient-list">
+      <view class="ingredient-item" wx:for="{{dishDetail.ingredients}}" wx:key="name">
+        <view class="ingredient-mark"></view>
+        <view class="ingredient-copy">
+          <text class="ingredient-name">{{item.name}}</text>
+          <text class="ingredient-amount">{{item.amount}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">STEPS</text>
+        <text class="section-title">制作步骤</text>
+        <text class="section-subtitle">步骤改成更清楚的时间线，做起来不会像看一段糊成团的说明书。</text>
+      </view>
+      <text class="result-count">{{dishDetail.steps.length}} 步</text>
+    </view>
+
+    <view class="step-list">
+      <view class="step-item" wx:for="{{dishDetail.steps}}" wx:key="step">
+        <view class="step-index">{{index + 1}}</view>
+        <view class="step-body">
+          <text class="step-text">{{item.description}}</text>
           <image wx:if="{{item.image}}" class="step-image" src="{{item.image}}" mode="aspectFill"></image>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- 小贴士 -->
-  <view class="tips-section glass-card fade-in" wx:if="{{dishDetail.tips}}">
-    <view class="section-header">
-      <view class="section-title">
-        <view class="title-icon">💡</view>
-        <text>小贴士</text>
+  <view class="surface-card section-shell fade-enter" wx:if="{{dishDetail.tips}}">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">KITCHEN NOTE</text>
+        <text class="section-title">小贴士</text>
       </view>
     </view>
-    <view class="tips-content">
-      <view class="tips-icon">💡</view>
-      <text class="tips-text">{{dishDetail.tips}}</text>
+    <view class="tip-box">
+      <text class="tip-text">{{dishDetail.tips}}</text>
     </view>
   </view>
 
-  <!-- 底部操作区域 -->
-  <view class="bottom-actions slide-up">
-    <view class="actions-content">
-      <button class="btn btn-secondary btn-sm" bindtap="goBack">
-        <view class="btn-content">
-          <view class="btn-icon">←</view>
-          <text>返回</text>
-        </view>
-      </button>
-      <button class="btn btn-primary" bindtap="addToMenu" wx:if="{{!isSelected}}">
-        <view class="btn-content">
-          <view class="btn-icon">+</view>
-          <text>加入菜单</text>
-        </view>
-      </button>
-      <button class="btn btn-success" bindtap="removeFromMenu" wx:else>
-        <view class="btn-content">
-          <view class="btn-icon">✓</view>
-          <text>已加入菜单</text>
-        </view>
-      </button>
-      <button class="btn btn-primary" bindtap="shareDish">
-        <view class="btn-content">
-          <view class="btn-icon">📤</view>
-          <text>分享菜品</text>
-        </view>
-      </button>
-    </view>
-    <view class="actions-decoration">
-      <view class="decoration-dot"></view>
-      <view class="decoration-dot"></view>
-      <view class="decoration-dot"></view>
+  <view class="bottom-dock rise-enter">
+    <view class="dock-content detail-dock">
+      <button class="ghost-btn detail-back" bindtap="goBack">返回</button>
+      <button class="primary-btn detail-main" bindtap="addToMenu" wx:if="{{!isSelected}}">加入菜单</button>
+      <button class="tonal-btn detail-main selected-btn" bindtap="removeFromMenu" wx:else>已加入，点此移除</button>
+      <button class="ghost-btn detail-share" bindtap="shareDish">分享</button>
     </view>
   </view>
 </view>

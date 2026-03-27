@@ -1,138 +1,118 @@
-<!--pages/index/index.wxml-->
-<view class="container">
-  <!-- 头部欢迎区域 -->
-  <view class="header">
-    <view class="header-content">
-      <view class="welcome-section">
-        <view class="welcome-icon">🍽️</view>
-        <view class="welcome-text">今天想吃什么？</view>
-        <view class="date-text">{{currentDate}}</view>
-      </view>
-      <view class="weather-info">
-        <view class="weather-icon">☀️</view>
-        <view class="weather-text">适合下厨的好天气</view>
-      </view>
+<view class="page-shell">
+  <view class="hero-card rise-enter">
+    <view class="hero-eyebrow">
+      <text>DINNER STUDIO</text>
+      <text>{{currentDate}}</text>
     </view>
-    <view class="header-decoration">
-      <view class="decoration-circle circle-1"></view>
-      <view class="decoration-circle circle-2"></view>
-      <view class="decoration-circle circle-3"></view>
+    <view class="hero-title">把今天这顿饭，选得像精心策划过一样。</view>
+    <view class="hero-subtitle">{{heroTip}}</view>
+    <view class="hero-metrics">
+      <view class="hero-metric">
+        <text class="hero-metric-value">{{recommendDishes.length}}</text>
+        <text class="hero-metric-label">今日推荐</text>
+      </view>
+      <view class="hero-metric">
+        <text class="hero-metric-value">{{selectedDishes.length}}</text>
+        <text class="hero-metric-label">已选菜单</text>
+      </view>
+      <view class="hero-metric">
+        <text class="hero-metric-value">NOW</text>
+        <text class="hero-metric-label">{{todayMood}}</text>
+      </view>
     </view>
   </view>
 
-  <!-- 已选菜品区域 -->
-  <view class="selected-section glass-card fade-in" wx:if="{{selectedDishes.length > 0}}">
-    <view class="section-header">
-      <view class="section-title">
-        <view class="title-icon">✅</view>
-        <text>已选择的菜品</text>
-        <view class="count-badge">{{selectedDishes.length}}</view>
+  <view class="surface-card section-shell fade-enter" wx:if="{{selectedDishes.length > 0}}">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">CURATED MENU</text>
+        <text class="section-title">已选菜单</text>
+        <text class="section-subtitle">继续补齐几道菜，就能直接发给家人确认今晚安排。</text>
       </view>
-      <view class="clear-btn" bindtap="clearSelected">
-        <view class="clear-icon">🗑️</view>
-        <text>清空</text>
-      </view>
+      <view class="ghost-btn action-pill" bindtap="clearSelected">清空</view>
     </view>
-    <scroll-view class="selected-dishes" scroll-x="true" show-scrollbar="{{false}}">
-      <view class="selected-dish-item scale-in" 
-            wx:for="{{selectedDishes}}" 
-            wx:key="id"
-            style="animation-delay: {{index * 0.1}}s">
-        <view class="dish-card-inner">
-          <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
-          <view class="dish-overlay">
-            <view class="dish-name">{{item.name}}</view>
-            <view class="dish-category">{{item.category}}</view>
+
+    <scroll-view class="selected-scroll" scroll-x="true" show-scrollbar="{{false}}">
+      <view class="selected-row">
+        <view class="selected-card" wx:for="{{selectedDishes}}" wx:key="id">
+          <image class="selected-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="selected-overlay">
+            <text class="selected-name">{{item.name}}</text>
+            <text class="selected-meta">{{item.category}}</text>
           </view>
-          <view class="remove-btn" bindtap="removeDish" data-id="{{item.id}}">
-            <text>×</text>
-          </view>
+          <view class="selected-remove" bindtap="removeDish" data-id="{{item.id}}">×</view>
         </view>
       </view>
     </scroll-view>
   </view>
 
-  <!-- 推荐菜品区域 -->
-  <view class="recommend-section glass-card fade-in">
-    <view class="section-header">
-      <view class="section-title">
-        <view class="title-icon">🌟</view>
-        <text>今日推荐</text>
-        <view class="recommend-tag">精选</view>
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head section-head-stack">
+      <view class="section-title-wrap">
+        <text class="section-kicker">EDITOR PICKS</text>
+        <text class="section-title">今日推荐</text>
+        <text class="section-subtitle">挑一份更有卖相的家常菜单，兼顾速度、热量和下厨难度。</text>
       </view>
-      <view class="header-actions">
-        <view class="admin-btn" bindtap="goToAdmin">
-          <view class="btn-icon">⚙️</view>
-          <text>管理</text>
+      <view class="action-group">
+        <view class="tonal-btn action-pill" bindtap="goToAdmin">后台管理</view>
+        <view class="ghost-btn action-pill" bindtap="refreshRecommend">换一批</view>
+      </view>
+    </view>
+
+    <view class="feedback-banner" wx:if="{{error}}">
+      <text>{{error}}</text>
+    </view>
+
+    <view class="recommend-list" wx:if="{{recommendDishes.length > 0}}">
+      <view class="recommend-card" wx:for="{{recommendDishes}}" wx:key="id">
+        <view class="recommend-main" bindtap="goToDetail" data-id="{{item.id}}">
+          <image class="recommend-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="recommend-copy">
+            <view class="chip-row">
+              <text class="chip chip-light">{{item.category}}</text>
+              <text class="chip chip-mint">{{item.difficulty}}</text>
+              <text class="chip chip-outline" wx:if="{{item.isNew}}">新推荐</text>
+            </view>
+            <text class="recommend-name">{{item.name}}</text>
+            <text class="recommend-desc">适合 {{item.servings}} 人分享，制作时间约 {{item.cookingTime}}，热量 {{item.calories}} kcal。</text>
+            <view class="recommend-meta">
+              <view class="meta-block">
+                <text class="meta-label">烹饪时间</text>
+                <text class="meta-value">{{item.cookingTime}}</text>
+              </view>
+              <view class="meta-block">
+                <text class="meta-label">适合人数</text>
+                <text class="meta-value">{{item.servings}} 人</text>
+              </view>
+              <view class="meta-block">
+                <text class="meta-label">热量</text>
+                <text class="meta-value">{{item.calories}} kcal</text>
+              </view>
+            </view>
+          </view>
         </view>
-        <view class="refresh-btn" bindtap="refreshRecommend">
-          <view class="refresh-icon">🔄</view>
-          <text>换一批</text>
+        <view class="recommend-action">
+          <view class="primary-btn action-select {{item.selected ? 'selected' : ''}}" bindtap="selectDish" data-dish="{{item}}">
+            <text>{{item.selected ? '已加入菜单' : '加入菜单'}}</text>
+          </view>
         </view>
       </view>
     </view>
-    <view class="dish-grid">
-      <view class="dish-card hover-lift scale-in" 
-            wx:for="{{recommendDishes}}" 
-            wx:key="id"
-            style="animation-delay: {{index * 0.1}}s">
-        <view class="dish-content" bindtap="goToDetail" data-dish="{{item}}">
-          <view class="dish-image-container">
-            <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
-            <view class="dish-badge" wx:if="{{item.isNew}}">新品</view>
-            <view class="dish-favorite" wx:if="{{item.isFavorite}}">❤️</view>
-          </view>
-          <view class="dish-info">
-            <view class="dish-name">{{item.name}}</view>
-            <view class="dish-meta">
-              <view class="dish-category">{{item.category}}</view>
-              <view class="dish-difficulty">{{item.difficulty}}</view>
-            </view>
-            <view class="dish-stats">
-              <view class="stat-item">
-                <text class="stat-icon">🔥</text>
-                <text class="stat-text">{{item.calories}}卡</text>
-              </view>
-              <view class="stat-item">
-                <text class="stat-icon">⏱️</text>
-                <text class="stat-text">{{item.cookingTime}}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-        <view class="dish-actions">
-          <view class="select-btn {{item.selected ? 'selected' : ''}}" 
-                bindtap="selectDish" 
-                data-dish="{{item}}">
-            <view class="btn-icon">{{item.selected ? '✓' : '+'}}</view>
-            <text>{{item.selected ? '已选' : '选择'}}</text>
-          </view>
-        </view>
-      </view>
+
+    <view class="empty-panel" wx:else>
+      <text class="empty-title">推荐菜单还在整理中</text>
+      <text class="empty-desc">稍后再试，或者先去分类页自己搭一套更合口味的组合。</text>
     </view>
   </view>
 
-  <!-- 底部操作区域 -->
-  <view class="bottom-actions slide-up" wx:if="{{selectedDishes.length > 0}}">
-    <view class="actions-content">
-      <view class="selected-summary">
-        <view class="summary-icon">🍽️</view>
-        <view class="summary-text">
-          <text class="summary-count">{{selectedDishes.length}}道菜</text>
-          <text class="summary-desc">已准备就绪</text>
-        </view>
+  <view class="bottom-dock rise-enter" wx:if="{{selectedDishes.length > 0}}">
+    <view class="dock-content">
+      <view class="icon-badge">荐</view>
+      <view class="dock-copy">
+        <text class="dock-title">已选 {{selectedDishes.length}} 道菜</text>
+        <text class="dock-desc">现在就可以整理成菜单并发送，也可以继续从推荐里补充。</text>
       </view>
-      <button class="btn btn-primary btn-lg send-btn" bindtap="sendToWeChat">
-        <view class="btn-content">
-          <view class="btn-icon">💌</view>
-          <text>发送给老公</text>
-        </view>
-      </button>
-    </view>
-    <view class="actions-decoration">
-      <view class="decoration-dot"></view>
-      <view class="decoration-dot"></view>
-      <view class="decoration-dot"></view>
+      <button class="primary-btn dock-action" bindtap="sendToWeChat">发送菜单</button>
     </view>
   </view>
 </view>

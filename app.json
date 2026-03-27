@@ -6,20 +6,21 @@
     "pages/category/category",
     "pages/auth/auth",
     "pages/admin/admin",
+    "pages/recipe-import/recipe-import",
     "pages/recipe-add/recipe-add",
     "pages/recipe-manage/recipe-manage"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#ff6b6b",
+    "navigationBarBackgroundColor": "#214033",
     "navigationBarTitleText": "家庭菜单",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#f8f9fa"
+    "backgroundColor": "#f6f1e8"
   },
   "tabBar": {
-    "color": "#666666",
-    "selectedColor": "#ff6b6b",
-    "backgroundColor": "rgba(255, 255, 255, 0.95)",
+    "color": "#6f776f",
+    "selectedColor": "#d96b4d",
+    "backgroundColor": "#fffaf4",
     "borderStyle": "white",
     "list": [
       {
@@ -30,7 +31,7 @@
       },
       {
         "pagePath": "pages/category/category",
-        "text": "分类浏览",
+        "text": "灵感选菜",
         "iconPath": "images/category.png",
         "selectedIconPath": "images/category-active.png"
       }

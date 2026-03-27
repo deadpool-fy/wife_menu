@@ -1,0 +1,155 @@
+<view class="page-shell">
+  <view class="hero-card rise-enter">
+    <view class="hero-eyebrow">
+      <text>CREATE RECIPE</text>
+      <text>后台录入</text>
+    </view>
+    <view class="hero-title">新增菜谱，也应该像在编辑一份正式内容。</view>
+    <view class="hero-subtitle">把录入步骤拆成更顺手的模块，避免表单又长又乱，最后谁都不想维护。</view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">BASIC INFO</text>
+        <text class="section-title">基础信息</text>
+        <text class="section-subtitle">先把名称、简介、分类和封面定下来，整道菜的气质就立住了。</text>
+      </view>
+    </view>
+
+    <view class="form-stack">
+      <view class="field">
+        <text class="field-label">菜谱名称</text>
+        <input class="field-input" placeholder="例如：番茄牛腩煲" value="{{formData.title}}" bindinput="onTitleInput" />
+      </view>
+
+      <view class="field">
+        <text class="field-label">菜谱简介</text>
+        <textarea class="field-textarea" placeholder="用一句话概括这道菜适合谁、好吃在哪、适合什么场景。" value="{{formData.description}}" bindinput="onDescriptionInput"></textarea>
+      </view>
+
+      <view class="field">
+        <text class="field-label">封面图片</text>
+        <view class="image-panel">
+          <image wx:if="{{formData.image}}" class="cover-preview" src="{{formData.image}}" mode="aspectFill"></image>
+          <view wx:else class="image-placeholder">
+            <text class="image-placeholder-title">还没有封面图</text>
+            <text class="image-placeholder-desc">建议使用干净、明亮、主体明确的菜品图片。</text>
+          </view>
+          <view class="image-actions">
+            <view class="ghost-btn image-btn" bindtap="chooseImage">选择图片</view>
+            <view class="ghost-btn image-btn" bindtap="removeImage" wx:if="{{formData.image}}">移除</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="picker-grid">
+        <picker class="picker-field" range="{{categories}}" range-key="name" value="{{formData.categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker-box">
+            <text class="field-label">分类</text>
+            <text class="picker-value">{{formData.categoryIndex >= 0 ? categories[formData.categoryIndex].name : '请选择分类'}}</text>
+          </view>
+        </picker>
+        <picker class="picker-field" range="{{difficulties}}" value="{{formData.difficultyIndex}}" bindchange="onDifficultyChange">
+          <view class="picker-box">
+            <text class="field-label">难度</text>
+            <text class="picker-value">{{difficulties[formData.difficultyIndex]}}</text>
+          </view>
+        </picker>
+        <picker class="picker-field" range="{{cookingTimes}}" value="{{formData.cookingTimeIndex}}" bindchange="onCookingTimeChange">
+          <view class="picker-box">
+            <text class="field-label">制作时间</text>
+            <text class="picker-value">{{cookingTimes[formData.cookingTimeIndex]}}</text>
+          </view>
+        </picker>
+        <picker class="picker-field" range="{{servingsOptions}}" value="{{formData.servingsIndex}}" bindchange="onServingsChange">
+          <view class="picker-box">
+            <text class="field-label">适合人数</text>
+            <text class="picker-value">{{servingsOptions[formData.servingsIndex]}}</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <text class="field-label">热量估算</text>
+        <input class="field-input" type="number" placeholder="例如：380" value="{{formData.calories}}" bindinput="onCaloriesInput" />
+      </view>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">INGREDIENTS</text>
+        <text class="section-title">食材清单</text>
+      </view>
+      <view class="ghost-btn action-pill" bindtap="addIngredient">新增食材</view>
+    </view>
+    <view class="editor-list">
+      <view class="inline-editor" wx:for="{{formData.ingredients}}" wx:key="index">
+        <input class="field-input flex-fill" placeholder="食材名称" value="{{item.name}}" bindinput="onIngredientNameInput" data-index="{{index}}" />
+        <input class="field-input amount-input" placeholder="份量" value="{{item.amount}}" bindinput="onIngredientAmountInput" data-index="{{index}}" />
+        <view class="inline-remove" bindtap="removeIngredient" data-index="{{index}}">×</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">STEPS</text>
+        <text class="section-title">制作步骤</text>
+      </view>
+      <view class="ghost-btn action-pill" bindtap="addStep">新增步骤</view>
+    </view>
+    <view class="step-list">
+      <view class="step-editor" wx:for="{{formData.steps}}" wx:key="index">
+        <view class="step-badge">{{index + 1}}</view>
+        <textarea class="field-textarea step-textarea" placeholder="描述这一步具体怎么做，尽量写清楚动作和顺序。" value="{{item.description}}" bindinput="onStepInput" data-index="{{index}}"></textarea>
+        <view class="inline-remove" bindtap="removeStep" data-index="{{index}}">×</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">NOTES</text>
+        <text class="section-title">补充说明</text>
+      </view>
+    </view>
+
+    <view class="form-stack">
+      <view class="field">
+        <text class="field-label">小贴士</text>
+        <textarea class="field-textarea" placeholder="例如：先煎后炖更香、火候不要太大、适合搭配米饭等。" value="{{formData.tips}}" bindinput="onTipsInput"></textarea>
+      </view>
+
+      <view class="field">
+        <text class="field-label">标签</text>
+        <view class="tag-box">
+          <view class="tag-item" wx:for="{{formData.tags}}" wx:key="index">
+            <text>{{item}}</text>
+            <text class="tag-remove" bindtap="removeTag" data-index="{{index}}">×</text>
+          </view>
+        </view>
+        <view class="tag-entry">
+          <input class="field-input flex-fill" placeholder="输入标签后点击添加，例如：下饭、快手、节日感" value="{{newTag}}" bindinput="onTagInput" />
+          <view class="ghost-btn tag-add" bindtap="addTag">添加</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-dock rise-enter">
+    <view class="dock-content">
+      <view class="dock-copy">
+        <text class="dock-title">录入完成后可直接提交</text>
+        <text class="dock-desc">至少填写名称、简介、分类、一个食材和一个步骤。</text>
+      </view>
+      <button class="primary-btn dock-action" bindtap="submitRecipe" disabled="{{isSubmitting}}">
+        {{isSubmitting ? '提交中...' : '保存菜谱'}}
+      </button>
+    </view>
+  </view>
+</view>

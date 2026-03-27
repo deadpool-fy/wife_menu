@@ -50,6 +50,22 @@ class CloudApiService {
     return await this.callCloudFunction('recipe-manager', 'getStats');
   }
 
+  async createImportDraft(payload) {
+    return await this.callCloudFunction('recipe-manager', 'createImportDraft', payload);
+  }
+
+  async getImportDrafts(params = {}) {
+    return await this.callCloudFunction('recipe-manager', 'getImportDrafts', params);
+  }
+
+  async approveImportDraft(payload) {
+    return await this.callCloudFunction('recipe-manager', 'approveImportDraft', payload);
+  }
+
+  async rejectImportDraft(payload) {
+    return await this.callCloudFunction('recipe-manager', 'rejectImportDraft', payload);
+  }
+
   // 获取推荐菜谱
   async getRecommendRecipes(limit = 6) {
     const result = await this.getRecipes({ 

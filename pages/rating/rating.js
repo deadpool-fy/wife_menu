@@ -1,90 +1,75 @@
-// pages/rating/rating.js
 const app = getApp()
 const messageService = require('../../utils/messageService.js')
 
 Page({
   data: {
     selectedDishes: [],
-    canSubmit: false
+    canSubmit: false,
+    completedRatings: 0,
+    totalDishes: 0,
+    ratingProgress: 0
   },
 
   onLoad() {
     this.loadSelectedDishes()
   },
 
-  // 加载已选择的菜品
   loadSelectedDishes() {
-    const selectedDishes = app.getSelectedDishes()
-    
-    // 为每个菜品添加评分和评价字段
-    const dishesWithRating = selectedDishes.map(dish => ({
+    const dishesWithRating = app.getSelectedDishes().map((dish) => ({
       ...dish,
       rating: 0,
       comment: ''
     }))
-    
+
     this.setData({
       selectedDishes: dishesWithRating
     })
-    
-    this.checkCanSubmit()
+
+    this.syncProgress()
   },
 
-  // 设置评分
   setRating(e) {
-    const dishId = e.currentTarget.dataset.dishId
-    const rating = e.currentTarget.dataset.rating
-    
-    const selectedDishes = this.data.selectedDishes.map(dish => {
-      if (dish.id === dishId) {
-        return { ...dish, rating: rating }
-      }
-      return dish
-    })
-    
+    const { dishId, rating } = e.currentTarget.dataset
+
     this.setData({
-      selectedDishes: selectedDishes
+      selectedDishes: this.data.selectedDishes.map((dish) => (
+        dish.id === dishId ? { ...dish, rating } : dish
+      ))
     })
-    
-    this.checkCanSubmit()
+
+    this.syncProgress()
   },
 
-  // 输入评价内容
   onCommentInput(e) {
-    const dishId = e.currentTarget.dataset.dishId
+    const { dishId } = e.currentTarget.dataset
     const comment = e.detail.value
-    
-    const selectedDishes = this.data.selectedDishes.map(dish => {
-      if (dish.id === dishId) {
-        return { ...dish, comment: comment }
-      }
-      return dish
-    })
-    
+
     this.setData({
-      selectedDishes: selectedDishes
+      selectedDishes: this.data.selectedDishes.map((dish) => (
+        dish.id === dishId ? { ...dish, comment } : dish
+      ))
     })
-    
-    this.checkCanSubmit()
+
+    this.syncProgress()
   },
 
-  // 检查是否可以提交
-  checkCanSubmit() {
+  syncProgress() {
     const selectedDishes = this.data.selectedDishes
-    const hasRating = selectedDishes.some(dish => dish.rating > 0)
-    const hasComment = selectedDishes.some(dish => dish.comment.trim().length > 0)
-    
+    const completedRatings = selectedDishes.filter((dish) => dish.rating > 0 || dish.comment.trim().length > 0).length
+    const totalDishes = selectedDishes.length
+
     this.setData({
-      canSubmit: hasRating || hasComment
+      completedRatings,
+      totalDishes,
+      ratingProgress: totalDishes ? Math.round((completedRatings / totalDishes) * 100) : 0,
+      canSubmit: completedRatings > 0
     })
   },
 
-  // 提交评价
   submitRating() {
-    const selectedDishes = this.data.selectedDishes
-    const ratings = selectedDishes.filter(dish => dish.rating > 0 || dish.comment.trim().length > 0)
-    
-    if (ratings.length === 0) {
+    const ratings = this.data.selectedDishes.filter((dish) => dish.rating > 0 || dish.comment.trim().length > 0)
+
+    if (!ratings.length) {
       wx.showToast({
         title: '请至少评价一道菜',
         icon: 'none'
@@ -92,54 +77,49 @@ Page({
       return
     }
 
-    // 显示发送选项
     wx.showActionSheet({
-      itemList: ['发送给宝宝', '复制到剪贴板', '分享给朋友'],
+      itemList: ['发送给家人', '复制到剪贴板', '分享给朋友'],
       success: (res) => {
-        switch (res.tapIndex) {
-          case 0:
-            this.sendWeChatRatingMessage(ratings)
-            break
-          case 1:
-            this.copyRatingToClipboard(ratings)
-            break
-          case 2:
-            this.shareRatingToFriend(ratings)
-            break
+        if (res.tapIndex === 0) {
+          this.sendWeChatRatingMessage(ratings)
+        } else if (res.tapIndex === 1) {
+          this.copyRatingToClipboard(ratings)
+        } else if (res.tapIndex === 2) {
+          this.shareRatingToFriend(ratings)
         }
       }
     })
   },
 
-  // 发送微信评价消息
   sendWeChatRatingMessage(ratings) {
-    wx.showLoading({
-      title: '发送中...'
-    })
+    wx.showLoading({ title: '发送中...' })
 
     const currentTime = messageService.getCurrentTime()
+
     messageService.sendRatingMessage(ratings, currentTime)
       .then((result) => {
         wx.hideLoading()
-        if (result.success) {
-          wx.showToast({
-            title: '评价发送成功',
-            icon: 'success'
-          })
-          // 清空已选择的菜品
-          app.clearSelectedDishes()
-          // 跳转回首页
-          setTimeout(() => {
-            wx.switchTab({
-              url: '/pages/index/index'
-            })
-          }, 1500)
-        } else {
+
+        if (!result.success) {
           wx.showToast({
             title: result.message || '发送失败',
             icon: 'none'
           })
+          return
         }
+
+        wx.showToast({
+          title: '评价发送成功',
+          icon: 'success'
+        })
+
+        app.clearSelectedDishes()
+
+        setTimeout(() => {
+          wx.switchTab({
+            url: '/pages/index/index'
+          })
+        }, 1200)
       })
       .catch((error) => {
         wx.hideLoading()
@@ -150,32 +130,30 @@ Page({
       })
   },
 
-  // 复制评价到剪贴板
   copyRatingToClipboard(ratings) {
-    let ratingContent = `今天的菜品评价：\n\n`
+    let content = '今天的菜单评价：\n\n'
+
     ratings.forEach((dish, index) => {
-      ratingContent += `${index + 1}. ${dish.name}\n`
+      content += `${index + 1}. ${dish.name}\n`
       if (dish.rating > 0) {
-        ratingContent += `评分：${dish.rating}分\n`
+        content += `评分：${dish.rating} 分\n`
       }
       if (dish.comment.trim()) {
-        ratingContent += `评价：${dish.comment}\n`
+        content += `评价：${dish.comment}\n`
       }
-      ratingContent += `\n`
+      content += '\n'
     })
-    
-    ratingContent += `评价时间：${this.getCurrentTime()}`
 
-    messageService.copyToClipboard(ratingContent)
+    content += `评价时间：${this.getCurrentTime()}`
+
+    messageService.copyToClipboard(content)
       .then(() => {
-        // 清空已选择的菜品
         app.clearSelectedDishes()
-        // 跳转回首页
         setTimeout(() => {
           wx.switchTab({
             url: '/pages/index/index'
           })
-        }, 1500)
+        }, 1200)
       })
       .catch((error) => {
         wx.showToast({
@@ -185,31 +163,29 @@ Page({
       })
   },
 
-  // 分享评价给朋友
   shareRatingToFriend(ratings) {
-    let ratingContent = `今天的菜品评价：\n\n`
+    let content = '今天的菜单评价：\n\n'
+
     ratings.forEach((dish, index) => {
-      ratingContent += `${index + 1}. ${dish.name}\n`
+      content += `${index + 1}. ${dish.name}\n`
       if (dish.rating > 0) {
-        ratingContent += `评分：${dish.rating}分\n`
+        content += `评分：${dish.rating} 分\n`
       }
       if (dish.comment.trim()) {
-        ratingContent += `评价：${dish.comment}\n`
+        content += `评价：${dish.comment}\n`
       }
-      ratingContent += `\n`
+      content += '\n'
     })
-    
-    ratingContent += `评价时间：${this.getCurrentTime()}`
 
-    // 复制到剪贴板
+    content += `评价时间：${this.getCurrentTime()}`
+
     wx.setClipboardData({
-      data: ratingContent,
+      data: content,
       success: () => {
         wx.showModal({
           title: '评价已复制',
-          content: '评价已复制到剪贴板，您可以分享给朋友或发送给家人',
-          showCancel: false,
-          confirmText: '知道了'
+          content: '可以把这份菜单反馈直接发送给家人或朋友。',
+          showCancel: false
         })
       },
       fail: () => {
@@ -221,34 +197,31 @@ Page({
     })
   },
 
-  // 跳过评价
   skipRating() {
     wx.showModal({
-      title: '确认跳过',
-      content: '确定要跳过评价吗？',
+      title: '跳过评价',
+      content: '确定现在先不评价，直接返回首页吗？',
       success: (res) => {
-        if (res.confirm) {
-          // 清空已选择的菜品
-          app.clearSelectedDishes()
-          
-          // 跳转回首页
-          wx.switchTab({
-            url: '/pages/index/index'
-          })
+        if (!res.confirm) {
+          return
         }
+
+        app.clearSelectedDishes()
+        wx.switchTab({
+          url: '/pages/index/index'
+        })
       }
     })
   },
 
-  // 获取当前时间
   getCurrentTime() {
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
     const day = now.getDate()
     const hour = now.getHours()
-    const minute = now.getMinutes()
-    
-    return `${year}年${month}月${day}日 ${hour}:${minute.toString().padStart(2, '0')}`
+    const minute = now.getMinutes().toString().padStart(2, '0')
+
+    return `${year}年${month}月${day}日 ${hour}:${minute}`
   }
 })

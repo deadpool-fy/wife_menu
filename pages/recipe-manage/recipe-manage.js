@@ -1,9 +1,7 @@
-// 菜谱管理页面
-const cloudApiService = require('../../utils/cloudApi.js');
+const cloudApiService = require('../../utils/cloudApi.js')
 
 Page({
   data: {
-    // 数据
     recipes: [],
     categories: [],
     stats: {
@@ -11,16 +9,10 @@ Page({
       totalCategories: 0,
       recentRecipes: []
     },
-    
-    // 筛选条件
     filterCategoryIndex: -1,
     filterDifficultyIndex: -1,
     searchKeyword: '',
-    
-    // 选项数据
     difficulties: ['简单', '中等', '困难'],
-    
-    // 分页
     currentPage: 1,
     totalPages: 1,
     hasMore: true,
@@ -28,263 +20,214 @@ Page({
   },
 
   onLoad() {
-    console.log('菜谱管理页面加载');
-    this.loadData();
+    this.loadData()
   },
 
   onShow() {
-    // 页面显示时刷新数据
-    this.loadData();
+    this.loadData()
   },
 
-  // 加载数据
   async loadData() {
     try {
-      this.setData({ isLoading: true });
-      
-      // 并行加载数据
-      const [recipesResult, categoriesResult, statsResult] = await Promise.all([
-        this.loadRecipes(),
+      this.setData({ isLoading: true })
+      await Promise.all([
         this.loadCategories(),
-        this.loadStats()
-      ]);
-      
-      console.log('数据加载完成');
+        this.loadStats(),
+        this.loadRecipes(1, false)
+      ])
     } catch (error) {
-      console.error('加载数据失败:', error);
+      console.error('加载数据失败:', error)
       wx.showToast({
-        title: '加载数据失败',
+        title: '加载失败',
         icon: 'none'
-      });
+      })
     } finally {
-      this.setData({ isLoading: false });
+      this.setData({ isLoading: false })
     }
   },
 
-  // 加载菜谱列表
-  async loadRecipes() {
-    try {
-      const params = {
-        page: 1,
-        limit: 20,
-        isActive: true
-      };
-      
-      // 添加筛选条件
-      if (this.data.filterCategoryIndex >= 0) {
-        params.category = this.data.categories[this.data.filterCategoryIndex].value;
-      }
-      
-      if (this.data.filterDifficultyIndex >= 0) {
-        params.difficulty = this.data.difficulties[this.data.filterDifficultyIndex];
-      }
-      
-      if (this.data.searchKeyword) {
-        params.search = this.data.searchKeyword;
-      }
-      
-      const result = await cloudApiService.getRecipes(params);
-      
-      if (result.success) {
-        this.setData({
-          recipes: result.data.recipes,
-          currentPage: 1,
-          totalPages: Math.ceil(result.data.total / 20),
-          hasMore: result.data.recipes.length < result.data.total
-        });
-      }
-    } catch (error) {
-      console.error('加载菜谱列表失败:', error);
-      throw error;
+  getQueryParams(page = 1) {
+    const params = {
+      page,
+      limit: 20,
+      isActive: true
     }
+
+    if (this.data.filterCategoryIndex >= 0 && this.data.categories[this.data.filterCategoryIndex]) {
+      params.category = this.data.categories[this.data.filterCategoryIndex].value
+    }
+
+    if (this.data.filterDifficultyIndex >= 0) {
+      params.difficulty = this.data.difficulties[this.data.filterDifficultyIndex]
+    }
+
+    if (this.data.searchKeyword.trim()) {
+      params.search = this.data.searchKeyword.trim()
+    }
+
+    return params
   },
 
-  // 加载分类列表
+  async loadRecipes(page = 1, append = false) {
+    const result = await cloudApiService.getRecipes(this.getQueryParams(page))
+
+    if (!result.success) {
+      throw new Error(result.message || '加载菜谱失败')
+    }
+
+    const incoming = result.data.recipes || []
+    const recipes = append ? [...this.data.recipes, ...incoming] : incoming
+    const total = result.data.total || recipes.length
+
+    this.setData({
+      recipes,
+      currentPage: page,
+      totalPages: Math.max(1, Math.ceil(total / 20)),
+      hasMore: recipes.length < total
+    })
+  },
+
   async loadCategories() {
-    try {
-      const result = await cloudApiService.getCategories();
-      if (result.success) {
-        this.setData({
-          categories: result.data
-        });
-      }
-    } catch (error) {
-      console.error('加载分类列表失败:', error);
-      throw error;
+    const result = await cloudApiService.getCategories()
+    if (result.success) {
+      this.setData({
+        categories: result.data
+      })
     }
   },
 
-  // 加载统计信息
   async loadStats() {
-    try {
-      const result = await cloudApiService.getStats();
-      if (result.success) {
-        this.setData({
-          stats: result.data
-        });
-      }
-    } catch (error) {
-      console.error('加载统计信息失败:', error);
-      throw error;
+    const result = await cloudApiService.getStats()
+    if (result.success) {
+      this.setData({
+        stats: result.data
+      })
     }
   },
 
-  // 刷新数据
   async refreshData() {
-    wx.showLoading({ title: '刷新中...' });
+    wx.showLoading({ title: '刷新中...' })
     try {
-      await this.loadData();
+      await this.loadData()
       wx.showToast({
-        title: '刷新成功',
+        title: '已刷新',
         icon: 'success'
-      });
+      })
     } catch (error) {
       wx.showToast({
         title: '刷新失败',
         icon: 'none'
-      });
+      })
     } finally {
-      wx.hideLoading();
+      wx.hideLoading()
     }
   },
 
-  // 添加菜谱
   addRecipe() {
     wx.navigateTo({
       url: '/pages/recipe-add/recipe-add'
-    });
+    })
   },
 
-  // 编辑菜谱
-  editRecipe(e) {
-    const id = e.currentTarget.dataset.id;
+  previewRecipe(e) {
+    const id = e.currentTarget.dataset.id
     wx.navigateTo({
-      url: `/pages/recipe-edit/recipe-edit?id=${id}`
-    });
+      url: `/pages/detail/detail?id=${id}`
+    })
   },
 
-  // 删除菜谱
+  editRecipe() {
+    wx.showToast({
+      title: '编辑页暂未开放，我可以下一步继续补上',
+      icon: 'none',
+      duration: 2200
+    })
+  },
+
   deleteRecipe(e) {
-    const id = e.currentTarget.dataset.id;
-    const recipe = this.data.recipes.find(item => item._id === id);
-    
+    const id = e.currentTarget.dataset.id
+    const recipe = this.data.recipes.find((item) => item._id === id)
+
     wx.showModal({
-      title: '确认删除',
-      content: `确定要删除菜谱"${recipe.title}"吗？此操作不可恢复。`,
+      title: '删除菜谱',
+      content: `确认删除“${recipe ? recipe.title : '该菜谱'}”吗？此操作不可恢复。`,
+      confirmColor: '#bf5638',
       success: async (res) => {
-        if (res.confirm) {
-          await this.performDelete(id);
+        if (!res.confirm) {
+          return
         }
+
+        await this.performDelete(id)
       }
-    });
+    })
   },
 
-  // 执行删除
   async performDelete(id) {
     try {
-      wx.showLoading({ title: '删除中...' });
-      
-      const result = await cloudApiService.deleteRecipe(id);
-      
-      if (result.success) {
-        wx.showToast({
-          title: '删除成功',
-          icon: 'success'
-        });
-        
-        // 刷新列表
-        await this.loadRecipes();
-      } else {
-        throw new Error(result.message || '删除失败');
+      wx.showLoading({ title: '删除中...' })
+      const result = await cloudApiService.deleteRecipe(id)
+
+      if (!result.success) {
+        throw new Error(result.message || '删除失败')
       }
+
+      wx.showToast({
+        title: '删除成功',
+        icon: 'success'
+      })
+
+      await this.loadData()
     } catch (error) {
-      console.error('删除菜谱失败:', error);
+      console.error('删除菜谱失败:', error)
       wx.showToast({
         title: error.message || '删除失败',
         icon: 'none'
-      });
+      })
     } finally {
-      wx.hideLoading();
+      wx.hideLoading()
     }
   },
 
-  // 分类筛选
   onCategoryFilterChange(e) {
-    const index = e.detail.value;
     this.setData({
-      filterCategoryIndex: index
-    });
-    this.loadRecipes();
+      filterCategoryIndex: Number(e.detail.value)
+    })
+    this.loadRecipes(1, false)
   },
 
-  // 难度筛选
   onDifficultyFilterChange(e) {
-    const index = e.detail.value;
     this.setData({
-      filterDifficultyIndex: index
-    });
-    this.loadRecipes();
+      filterDifficultyIndex: Number(e.detail.value)
+    })
+    this.loadRecipes(1, false)
   },
 
-  // 搜索输入
   onSearchInput(e) {
     this.setData({
       searchKeyword: e.detail.value
-    });
+    })
   },
 
-  // 搜索确认
   onSearch() {
-    this.loadRecipes();
+    this.loadRecipes(1, false)
   },
 
-  // 加载更多
   async loadMore() {
     if (this.data.isLoading || !this.data.hasMore) {
-      return;
+      return
     }
-    
+
     try {
-      this.setData({ isLoading: true });
-      
-      const params = {
-        page: this.data.currentPage + 1,
-        limit: 20,
-        isActive: true
-      };
-      
-      // 添加筛选条件
-      if (this.data.filterCategoryIndex >= 0) {
-        params.category = this.data.categories[this.data.filterCategoryIndex].value;
-      }
-      
-      if (this.data.filterDifficultyIndex >= 0) {
-        params.difficulty = this.data.difficulties[this.data.filterDifficultyIndex];
-      }
-      
-      if (this.data.searchKeyword) {
-        params.search = this.data.searchKeyword;
-      }
-      
-      const result = await cloudApiService.getRecipes(params);
-      
-      if (result.success) {
-        const newRecipes = [...this.data.recipes, ...result.data.recipes];
-        this.setData({
-          recipes: newRecipes,
-          currentPage: this.data.currentPage + 1,
-          hasMore: newRecipes.length < result.data.total
-        });
-      }
+      this.setData({ isLoading: true })
+      await this.loadRecipes(this.data.currentPage + 1, true)
     } catch (error) {
-      console.error('加载更多失败:', error);
+      console.error('加载更多失败:', error)
       wx.showToast({
         title: '加载更多失败',
         icon: 'none'
-      });
+      })
     } finally {
-      this.setData({ isLoading: false });
+      this.setData({ isLoading: false })
     }
   }
-});
-
+})

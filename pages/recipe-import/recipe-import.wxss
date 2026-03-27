@@ -1,20 +1,23 @@
-.action-row {
-  display: flex;
-  gap: 14rpx;
-}
-
-.action-main {
-  flex: 1;
-}
-
-.filter-stack {
+.form-stack {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 18rpx;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.field-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
 }
 
 .picker-box,
-.field-input {
+.field-input,
+.field-textarea {
   width: 100%;
   padding: 22rpx 24rpx;
   border-radius: 24rpx;
@@ -24,11 +27,6 @@
   color: var(--text-primary);
 }
 
-.field-label {
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
-}
-
 .picker-value {
   display: block;
   margin-top: 8rpx;
@@ -36,43 +34,58 @@
   font-weight: 600;
 }
 
-.recipe-list {
+.large-textarea {
+  min-height: 320rpx;
+}
+
+.submit-row {
+  margin-top: 20rpx;
+}
+
+.submit-btn {
+  width: 100%;
+}
+
+.action-pill,
+.mini-btn {
+  height: 72rpx;
+  padding: 0 24rpx;
+  font-size: var(--font-xs);
+}
+
+.draft-list {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
-}
-
-.recipe-card {
-  padding: 20rpx;
-}
-
-.recipe-main {
-  display: flex;
   gap: 18rpx;
 }
 
-.recipe-image {
-  width: 180rpx;
-  height: 180rpx;
-  border-radius: 28rpx;
-  flex-shrink: 0;
+.draft-card {
+  padding: 24rpx;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.56);
 }
 
-.recipe-copy {
-  flex: 1;
-  min-width: 0;
+.draft-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16rpx;
 }
 
-.recipe-title {
+.draft-time {
+  font-size: var(--font-xs);
+  color: var(--text-tertiary);
+}
+
+.draft-title {
   display: block;
   margin-top: 16rpx;
   font-size: var(--font-lg);
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.2;
 }
 
-.recipe-desc {
+.draft-desc {
   display: block;
   margin-top: 10rpx;
   font-size: var(--font-sm);
@@ -80,49 +93,22 @@
   line-height: 1.6;
 }
 
-.recipe-meta {
+.draft-meta,
+.draft-preview,
+.draft-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
+  gap: 12rpx;
   margin-top: 16rpx;
 }
 
-.meta-pill {
+.meta-pill,
+.preview-label {
   padding: 10rpx 14rpx;
   border-radius: 999rpx;
   background: rgba(246, 241, 232, 0.92);
   font-size: var(--font-xs);
   color: var(--text-secondary);
-}
-
-.tag-box {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10rpx;
-  margin-top: 14rpx;
-}
-
-.tag-item {
-  display: inline-flex;
-  align-items: center;
-  padding: 10rpx 16rpx;
-  border-radius: 999rpx;
-  background: rgba(126, 166, 138, 0.16);
-  color: #456150;
-  font-size: var(--font-xs);
-}
-
-.recipe-actions {
-  display: flex;
-  gap: 12rpx;
-  margin-top: 18rpx;
-}
-
-.mini-btn {
-  flex: 1;
-  height: 72rpx;
-  padding: 0 10rpx;
-  font-size: var(--font-xs);
 }
 
 .danger-btn {

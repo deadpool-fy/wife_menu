@@ -1,131 +1,97 @@
-<!--pages/category/category.wxml-->
-<view class="container">
-  <!-- 分类标签区域 -->
-  <view class="category-tabs glass-card">
-    <view class="tabs-header">
-      <view class="tabs-title">
-        <view class="title-icon">🍽️</view>
-        <text>菜品分类</text>
-      </view>
-      <view class="tabs-count">{{filteredDishes.length}}道菜</view>
+<view class="page-shell">
+  <view class="hero-card rise-enter">
+    <view class="hero-eyebrow">
+      <text>DISCOVER</text>
+      <text>按口味筛选</text>
     </view>
-    <scroll-view class="tabs-scroll" scroll-x="true" show-scrollbar="{{false}}">
-      <view class="tab-item {{currentCategory === 'all' ? 'active' : ''}}" 
-            bindtap="switchCategory" data-category="all">
-        <view class="tab-icon">🍽️</view>
-        <text>全部</text>
+    <view class="hero-title">别再随便凑一顿，先从菜系灵感开始。</view>
+    <view class="hero-subtitle">把荤素、汤品和甜口拆开看，搭配起来会更有节奏，也更像一份认真准备的菜单。</view>
+    <view class="hero-metrics">
+      <view class="hero-metric">
+        <text class="hero-metric-value">{{filteredDishes.length}}</text>
+        <text class="hero-metric-label">当前分类</text>
       </view>
-      <view class="tab-item {{currentCategory === 'meat' ? 'active' : ''}}" 
-            bindtap="switchCategory" data-category="meat">
-        <view class="tab-icon">🥩</view>
-        <text>荤菜</text>
+      <view class="hero-metric">
+        <text class="hero-metric-value">{{selectedCount}}</text>
+        <text class="hero-metric-label">已选菜单</text>
       </view>
-      <view class="tab-item {{currentCategory === 'vegetable' ? 'active' : ''}}" 
-            bindtap="switchCategory" data-category="vegetable">
-        <view class="tab-icon">🥬</view>
-        <text>素菜</text>
+      <view class="hero-metric">
+        <text class="hero-metric-value">{{categoryName}}</text>
+        <text class="hero-metric-label">正在浏览</text>
       </view>
-      <view class="tab-item {{currentCategory === 'mixed' ? 'active' : ''}}" 
-            bindtap="switchCategory" data-category="mixed">
-        <view class="tab-icon">🥘</view>
-        <text>荤素搭配</text>
-      </view>
-      <view class="tab-item {{currentCategory === 'soup' ? 'active' : ''}}" 
-            bindtap="switchCategory" data-category="soup">
-        <view class="tab-icon">🍲</view>
-        <text>汤类</text>
-      </view>
-      <view class="tab-item {{currentCategory === 'dessert' ? 'active' : ''}}" 
-            bindtap="switchCategory" data-category="dessert">
-        <view class="tab-icon">🍰</view>
-        <text>甜品</text>
-      </view>
-    </scroll-view>
+    </view>
   </view>
 
-  <!-- 菜品网格区域 -->
-  <view class="dishes-grid">
-    <view class="dish-card hover-lift scale-in" 
-          wx:for="{{filteredDishes}}" 
-          wx:key="id"
-          style="animation-delay: {{index * 0.1}}s"
-          bindtap="goToDetail" 
-          data-dish="{{item}}">
-      <view class="dish-image-container">
-        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
-        <view class="dish-badge" wx:if="{{item.isNew}}">新品</view>
-        <view class="dish-favorite" wx:if="{{item.isFavorite}}">❤️</view>
-        <view class="dish-overlay">
-          <view class="overlay-content">
-            <view class="dish-name">{{item.name}}</view>
-            <view class="dish-category">{{item.category}}</view>
-          </view>
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">FILTERS</text>
+        <text class="section-title">分类筛选</text>
+        <text class="section-subtitle">先确定今晚要偏饱腹、清爽还是有点仪式感，再决定具体做什么。</text>
+      </view>
+      <text class="result-count">{{filteredDishes.length}} 道</text>
+    </view>
+
+    <scroll-view class="category-scroll" scroll-x="true" show-scrollbar="{{false}}">
+      <view class="category-row">
+        <view class="category-chip {{currentCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="switchCategory" data-category="{{item.id}}">
+          <text class="category-icon">{{item.icon}}</text>
+          <text class="category-name">{{item.name}}</text>
         </view>
       </view>
-      <view class="dish-info">
-        <view class="dish-meta">
-          <view class="meta-item">
-            <text class="meta-icon">⏱️</text>
-            <text class="meta-text">{{item.cookingTime}}</text>
-          </view>
-          <view class="meta-item">
-            <text class="meta-icon">👥</text>
-            <text class="meta-text">{{item.servings}}人份</text>
-          </view>
+    </scroll-view>
+
+    <view class="feedback-banner" wx:if="{{error}}">
+      <text>{{error}}</text>
+    </view>
+  </view>
+
+  <view class="dish-grid section-shell" wx:if="{{filteredDishes.length > 0}}">
+    <view class="dish-card surface-card fade-enter" wx:for="{{filteredDishes}}" wx:key="id">
+      <view class="dish-visual" bindtap="goToDetail" data-id="{{item.id}}">
+        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="dish-gradient"></view>
+        <view class="dish-topline">
+          <text class="chip chip-light">{{item.category}}</text>
+          <text class="chip chip-mint">{{item.difficulty}}</text>
         </view>
-        <view class="dish-tags">
-          <view class="tag difficulty-tag">{{item.difficulty}}</view>
-          <view class="tag category-tag">{{item.category}}</view>
+        <view class="dish-copy">
+          <text class="dish-name">{{item.name}}</text>
+          <text class="dish-desc">{{item.cookingTime}} · {{item.servings}} 人 · {{item.calories}} kcal</text>
+        </view>
+      </view>
+      <view class="dish-footer">
+        <view class="dish-stat">
+          <text class="stat-label">烹饪节奏</text>
+          <text class="stat-value">{{item.cookingTime}}</text>
+        </view>
+        <view class="dish-stat">
+          <text class="stat-label">推荐人数</text>
+          <text class="stat-value">{{item.servings}} 人</text>
         </view>
       </view>
       <view class="dish-actions">
-        <view class="action-btn {{item.selected ? 'selected' : ''}}" 
-              bindtap="toggleSelect" 
-              data-dish="{{item}}" 
-              catchtap="true">
-          <view class="btn-icon">{{item.selected ? '✓' : '+'}}</view>
-          <text>{{item.selected ? '已选' : '选择'}}</text>
+        <view class="primary-btn select-btn {{item.selected ? 'selected' : ''}}" catchtap="toggleSelect" data-dish="{{item}}">
+          <text>{{item.selected ? '已加入菜单' : '加入菜单'}}</text>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- 空状态 -->
-  <view class="empty-state fade-in" wx:if="{{filteredDishes.length === 0}}">
-    <view class="empty-content">
-      <view class="empty-icon">🍽️</view>
-      <view class="empty-text">暂无{{categoryName}}菜品</view>
-      <view class="empty-desc">试试其他分类吧</view>
-      <view class="empty-actions">
-        <view class="empty-btn" bindtap="switchCategory" data-category="all">
-          <view class="btn-icon">🔄</view>
-          <text>查看全部</text>
-        </view>
-      </view>
-    </view>
+  <view class="surface-card section-shell empty-panel fade-enter" wx:else>
+    <text class="empty-title">这个分类暂时还没有内容</text>
+    <text class="empty-desc">切换到别的分类看看，或者先返回全部菜品重新搭配。</text>
+    <view class="ghost-btn empty-btn" bindtap="switchCategory" data-category="all">查看全部菜品</view>
   </view>
 
-  <!-- 底部操作区域 -->
-  <view class="bottom-actions slide-up" wx:if="{{selectedCount > 0}}">
-    <view class="actions-content">
-      <view class="selected-info">
-        <view class="info-icon">✅</view>
-        <view class="info-text">
-          <text class="info-count">已选择 {{selectedCount}} 道菜</text>
-          <text class="info-desc">准备发送给老公</text>
-        </view>
+  <view class="bottom-dock rise-enter" wx:if="{{selectedCount > 0}}">
+    <view class="dock-content">
+      <view class="icon-badge">选</view>
+      <view class="dock-copy">
+        <text class="dock-title">已经选中 {{selectedCount}} 道菜</text>
+        <text class="dock-desc">回到首页就能整理成菜单并发送，不用担心刚刚的选择丢失。</text>
       </view>
-      <button class="btn btn-primary btn-lg" bindtap="goToMenu">
-        <view class="btn-content">
-          <view class="btn-icon">📋</view>
-          <text>查看菜单</text>
-        </view>
-      </button>
-    </view>
-    <view class="actions-decoration">
-      <view class="decoration-dot"></view>
-      <view class="decoration-dot"></view>
-      <view class="decoration-dot"></view>
+      <button class="primary-btn dock-action" bindtap="goToMenu">查看菜单</button>
     </view>
   </view>
 </view>

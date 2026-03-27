@@ -1,0 +1,94 @@
+<view class="page-shell">
+  <view class="hero-card rise-enter">
+    <view class="hero-eyebrow">
+      <text>IMPORT ASSISTANT</text>
+      <text>半自动导入</text>
+    </view>
+    <view class="hero-title">先把第三方内容导进草稿池，再决定哪些值得真正入库。</view>
+    <view class="hero-subtitle">这版先支持“链接 + 原始文本”的半自动导入，不直接自动上架，先把风险和质量控制住。</view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">SUBMIT</text>
+        <text class="section-title">创建导入草稿</text>
+        <text class="section-subtitle">建议把第三方页面里的标题、正文、食材和步骤粘进来，系统会先做一轮粗解析。</text>
+      </view>
+    </view>
+
+    <view class="form-stack">
+      <picker range="{{sourcePlatforms}}" range-key="label" value="{{sourcePlatformIndex}}" bindchange="onPlatformChange">
+        <view class="picker-box">
+          <text class="field-label">来源平台</text>
+          <text class="picker-value">{{sourcePlatforms[sourcePlatformIndex].label}}</text>
+        </view>
+      </picker>
+
+      <view class="field">
+        <text class="field-label">第三方链接</text>
+        <input class="field-input" placeholder="可选，先记录来源链接" value="{{sourceUrl}}" bindinput="onUrlInput" />
+      </view>
+
+      <view class="field">
+        <text class="field-label">手动标题</text>
+        <input class="field-input" placeholder="如果系统不好识别标题，可以在这里手动补充" value="{{sourceTitle}}" bindinput="onTitleInput" />
+      </view>
+
+      <view class="field">
+        <text class="field-label">原始菜谱文本</text>
+        <textarea class="field-textarea large-textarea" placeholder="把第三方平台里的正文、食材、步骤、小贴士直接粘贴进来，系统会自动切成待审核结构。" value="{{rawText}}" bindinput="onRawTextInput"></textarea>
+      </view>
+    </view>
+
+    <view class="submit-row">
+      <button class="primary-btn submit-btn" bindtap="submitImport" disabled="{{submitting}}">
+        {{submitting ? '处理中...' : '创建待审核草稿'}}
+      </button>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">REVIEW QUEUE</text>
+        <text class="section-title">待审核草稿</text>
+        <text class="section-subtitle">这里只展示待审核项，通过后进入正式菜谱库，驳回则留痕但不上架。</text>
+      </view>
+      <view class="ghost-btn action-pill" bindtap="loadDrafts">刷新</view>
+    </view>
+
+    <view class="draft-list" wx:if="{{drafts.length > 0}}">
+      <view class="draft-card" wx:for="{{drafts}}" wx:key="_id">
+        <view class="draft-head">
+          <view class="chip-row">
+            <text class="chip chip-light">{{item.sourcePlatform}}</text>
+            <text class="chip chip-outline">待审核</text>
+          </view>
+          <text class="draft-time">{{item.createdAt}}</text>
+        </view>
+        <text class="draft-title">{{item.parsedRecipe.title}}</text>
+        <text class="draft-desc">{{item.parsedRecipe.description}}</text>
+        <view class="draft-meta">
+          <text class="meta-pill">{{item.parsedRecipe.category}}</text>
+          <text class="meta-pill">{{item.parsedRecipe.difficulty}}</text>
+          <text class="meta-pill">{{item.parsedRecipe.cookingTime}}</text>
+        </view>
+        <view class="draft-preview">
+          <text class="preview-label">食材 {{item.parsedRecipe.ingredients.length}} 项</text>
+          <text class="preview-label">步骤 {{item.parsedRecipe.steps.length}} 步</text>
+        </view>
+        <view class="draft-actions">
+          <view class="ghost-btn mini-btn" bindtap="copyDraftText" data-text="{{item.originalText}}">复制原文</view>
+          <view class="danger-btn mini-btn" bindtap="rejectDraft" data-id="{{item._id}}">驳回</view>
+          <view class="primary-btn mini-btn" bindtap="approveDraft" data-id="{{item._id}}">通过并入库</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-panel" wx:else>
+      <text class="empty-title">{{loadingDrafts ? '正在加载草稿...' : '还没有待审核草稿'}}</text>
+      <text class="empty-desc">先导入一条链接或一段原始文本，这里就会出现对应的待审核内容。</text>
+    </view>
+  </view>
+</view>
