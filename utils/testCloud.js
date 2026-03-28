@@ -7,7 +7,7 @@ console.log('开始测试云开发配置...');
 console.log('1. 测试云开发初始化...');
 try {
   wx.cloud.init({
-    env: 'cloud1-5ga4h58zc0ea35dc',
+    env: 'cloud1-your-env-id',
     traceUser: true,
   });
   console.log('✅ 云开发初始化成功');

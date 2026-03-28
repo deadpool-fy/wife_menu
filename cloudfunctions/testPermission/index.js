@@ -14,7 +14,7 @@ exports.main = async (event, context) => {
     // 测试最简单的API调用
     const result = await cloud.openapi.subscribeMessage.send({
       touser: 'test_openid',
-      template_id: 'tLEKQiiMe8JDjm1GIGq5UDbHrZNZX0bxOhuRM0zho4g',
+      template_id: 'your-template-id',
       page: 'pages/index/index',
       data: {
         thing1: { value: '测试' },

@@ -284,7 +284,12 @@ async function autoImportByUrl(data) {
   }
 
   const fetchedRecipe = await fetchThirdPartyRecipe(sourceUrl, sourcePlatform)
-  const rawText = [fetchedRecipe.title, fetchedRecipe.description, fetchedRecipe.bodyText].filter(Boolean).join('\n')
+  const rawText = [
+    fetchedRecipe.title,
+    fetchedRecipe.description,
+    fetchedRecipe.bodyText,
+    fetchedRecipe.ocrText
+  ].filter(Boolean).join('\n')
   const parsedRecipe = mergeImportedRecipe(parseImportedRecipe(rawText), fetchedRecipe)
   const title = parsedRecipe.title || inferTitleFromUrl(sourceUrl)
 
@@ -296,6 +301,8 @@ async function autoImportByUrl(data) {
     sourcePlatform,
     sourceUrl,
     rawText,
+    sourceImages: fetchedRecipe.sourceImages || [],
+    ocrText: fetchedRecipe.ocrText || '',
     parsedRecipe: {
       ...parsedRecipe,
       title
@@ -466,12 +473,14 @@ function buildRecipeRecord(data) {
   }
 }
 
-function buildImportDraftRecord({ sourcePlatform, sourceUrl, rawText, parsedRecipe }) {
+function buildImportDraftRecord({ sourcePlatform, sourceUrl, rawText, sourceImages = [], ocrText = '', parsedRecipe }) {
   return {
     status: 'pending',
     sourcePlatform,
     sourceUrl,
     originalText: rawText,
+    sourceImages,
+    ocrText,
     parsedRecipe: {
       title: parsedRecipe.title,
       description: parsedRecipe.description || '待审核导入草稿，请补充更完整的简介。',
@@ -724,14 +733,17 @@ async function fetchThirdPartyRecipe(sourceUrl, sourcePlatform) {
 
   const html = await fetchPageHtml(sourceUrl)
   const metadata = extractRecipeMetadataFromHtml(html, sourceUrl)
+  const ocrText = await tryRecognizeImagesByOcr(metadata.sourceImages || [])
 
-  if (!metadata.title && !metadata.description && !metadata.bodyText) {
+  if (!metadata.title && !metadata.description && !metadata.bodyText && !ocrText) {
     throw new Error('当前链接暂时无法自动解析，建议稍后换链接重试')
   }
 
   return {
     ...metadata,
     sourceUrl,
+    sourceImages: metadata.sourceImages || [],
+    ocrText,
     author: metadata.author || sourcePlatformLabel(sourcePlatform),
     category: metadata.category || inferCategoryFromText(metadata.title, metadata.description, metadata.bodyText),
     difficulty: metadata.difficulty || inferDifficultyFromText(metadata.title, metadata.description, metadata.bodyText),
@@ -765,6 +777,36 @@ async function tryFetchFromExternalCrawler(sourceUrl, sourcePlatform) {
   }
 }
 
+async function tryRecognizeImagesByOcr(sourceImages) {
+  const images = (sourceImages || []).filter(Boolean).slice(0, 9)
+  if (!images.length) {
+    return ''
+  }
+
+  const baseUrl = process.env.IMPORT_OCR_BASE_URL
+  if (!baseUrl) {
+    return ''
+  }
+
+  try {
+    const responseText = await requestJson(
+      `${baseUrl.replace(/\/$/, '')}/ocr/images`,
+      {
+        images
+      }
+    )
+    const response = JSON.parse(responseText)
+    if (!response || !response.success) {
+      return ''
+    }
+
+    return String(response.text || response.data?.text || '').trim()
+  } catch (error) {
+    console.warn('ocr service unavailable:', error.message)
+    return ''
+  }
+}
+
 async function fetchPageHtml(sourceUrl) {
   const html = await requestUrl(sourceUrl, {
     headers: {
@@ -774,6 +816,43 @@ async function fetchPageHtml(sourceUrl) {
   })
 
   return String(html || '')
+}
+
+function requestJson(targetUrl, payload) {
+  const client = targetUrl.startsWith('https') ? https : http
+  const body = JSON.stringify(payload || {})
+  const parsed = new URL(targetUrl)
+
+  return new Promise((resolve, reject) => {
+    const req = client.request({
+      protocol: parsed.protocol,
+      hostname: parsed.hostname,
+      port: parsed.port || undefined,
+      path: `${parsed.pathname}${parsed.search}`,
+      method: 'POST',
+      timeout: 18000,
+      headers: {
+        'content-type': 'application/json',
+        'content-length': Buffer.byteLength(body)
+      }
+    }, (res) => {
+      const statusCode = res.statusCode || 0
+      const chunks = []
+      res.on('data', (chunk) => chunks.push(chunk))
+      res.on('end', () => {
+        if (statusCode >= 400) {
+          reject(new Error(`request failed with status ${statusCode}`))
+          return
+        }
+        resolve(Buffer.concat(chunks).toString('utf8'))
+      })
+    })
+
+    req.on('error', reject)
+    req.on('timeout', () => req.destroy(new Error('request timeout')))
+    req.write(body)
+    req.end()
+  })
 }
 
 function requestUrl(targetUrl, options = {}, redirectCount = 0) {
@@ -834,6 +913,7 @@ function extractRecipeMetadataFromHtml(html, sourceUrl) {
     extractMetaContent(normalizedHtml, 'name', 'twitter:image'),
     extractJsonLdField(normalizedHtml, 'image')
   ])
+  const sourceImages = extractImageUrlsFromHtml(normalizedHtml, sourceUrl)
   const author = firstNonEmpty([
     extractMetaContent(normalizedHtml, 'name', 'author'),
     extractJsonLdField(normalizedHtml, 'author')
@@ -856,12 +936,48 @@ function extractRecipeMetadataFromHtml(html, sourceUrl) {
     title: cleanText(title),
     description: cleanText(description),
     image: normalizeAssetUrl(image, sourceUrl),
+    sourceImages,
     bodyText: cleanBodyText(bodyText),
     author: cleanText(author),
     ingredients,
     steps,
     tags
   }
+}
+
+function extractImageUrlsFromHtml(html, sourceUrl) {
+  const urls = []
+  const pushUrl = (value) => {
+    const normalized = normalizeAssetUrl(value, sourceUrl)
+    if (!normalized) return
+    if (/\.svg(\?|$)/i.test(normalized)) return
+    if (!urls.includes(normalized)) {
+      urls.push(normalized)
+    }
+  }
+
+  const imageMatches = html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)
+  for (const match of imageMatches) {
+    pushUrl(match[1])
+  }
+
+  const ogImages = html.matchAll(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image)["'][^>]+content=["']([^"']+)["']/gi)
+  for (const match of ogImages) {
+    pushUrl(match[1])
+  }
+
+  const jsonImages = extractRecipeListFromJsonLd(html, 'image')
+  jsonImages.forEach((item) => {
+    if (typeof item === 'string') {
+      pushUrl(item)
+      return
+    }
+    if (item && typeof item === 'object') {
+      pushUrl(item.url || item.contentUrl || item.thumbnail)
+    }
+  })
+
+  return urls.slice(0, 12)
 }
 
 function extractMetaContent(html, attrName, attrValue) {

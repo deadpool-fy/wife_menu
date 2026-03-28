@@ -41,7 +41,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "2.19.4",
-  "appid": "wx5783986edcbaba40",
+  "appid": "wx-your-app-id",
   "projectname": "wife_menu",
   "condition": {},
   "editorSetting": {

@@ -53,7 +53,7 @@ Page({
       title: '请求授权中...'
     })
 
-    auth.requestSubscribeMessage('tLEKQiiMe8JDjm1GIGq5UDbHrZNZX0bxOhuRM0zho4g')
+    auth.requestSubscribeMessage('your-template-id')
       .then(() => {
         wx.hideLoading()
         wx.showToast({

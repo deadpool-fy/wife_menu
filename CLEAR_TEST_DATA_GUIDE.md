@@ -47,7 +47,7 @@
 console.log('开始清空所有测试数据...');
 
 wx.cloud.init({
-  env: 'cloud1-5ga4h58zc0ea35dc',
+  env: 'cloud1-your-env-id',
   traceUser: true,
 });
 

@@ -118,7 +118,7 @@
     </view>
   </view>
 
-  <view class="bottom-dock rise-enter" wx:if="{{selectedDishes.length > 0}}">
+  <view class="bottom-dock rise-enter" wx:if="{{selectedDishes.length > 0 && !sharePanelVisible}}">
     <view class="dock-content">
       <view class="icon-badge">荐</view>
       <view class="dock-copy">
@@ -126,6 +126,22 @@
         <text class="dock-desc">现在就可以整理成菜单并发送，也可以继续从推荐里补充。</text>
       </view>
       <button class="primary-btn dock-action" bindtap="sendToWeChat">发送菜单</button>
+    </view>
+  </view>
+
+  <view class="share-panel-mask" wx:if="{{sharePanelVisible}}" bindtap="closeSharePanel"></view>
+  <view class="share-panel rise-enter" wx:if="{{sharePanelVisible}}">
+    <view class="share-panel-head">
+      <text class="share-panel-title">分享给朋友</text>
+      <text class="share-panel-desc">这里会直接拉起微信原生分享面板，不再只是复制到剪贴板。</text>
+    </view>
+    <view class="share-panel-body">
+      <text class="share-panel-label">本次菜单</text>
+      <text class="share-panel-summary">{{shareSummary}}</text>
+    </view>
+    <view class="share-panel-actions">
+      <button class="ghost-btn share-secondary" bindtap="closeSharePanel">先不分享</button>
+      <button class="primary-btn share-primary" open-type="share">立即分享</button>
     </view>
   </view>
 </view>

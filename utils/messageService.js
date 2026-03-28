@@ -1,33 +1,26 @@
-// utils/messageService.js
-// 消息发送服务
+﻿const auth = require('./authorization.js')
+const messageConfig = require('../config/messageConfig.js')
 
-const auth = require('./authorization.js')
-
-// 配置信息
 const CONFIG = {
-  // 固定的接收者微信ID
-  TARGET_USER_ID: 'Dingding7654321_',
-  // 接收者昵称
-  TARGET_NICKNAME: '宝宝',
-  // 微信消息模板
-  WECHAT_MESSAGE_TEMPLATE: {
-    menu: '今天中午的菜单：\n\n{menu}\n\n时间：{date}\n\n来自：家庭菜单小程序',
-    rating: '今天的菜品评价：\n\n{rating}\n\n评价时间：{time}\n\n来自：家庭菜单小程序',
-    dish: '推荐一道美味的{name}！\n\n难度：{difficulty}\n制作时间：{time}\n适合人数：{servings}人\n\n食材清单：\n{ingredients}\n\n来自：家庭菜单小程序'
-  }
+  TARGET_USER_ID: messageConfig.TARGET_USER.WECHAT_ID,
+  TARGET_NICKNAME: messageConfig.TARGET_USER.NICKNAME,
+  TEMPLATE_IDS: {
+    menu: messageConfig.TEMPLATE_MESSAGE.MENU_TEMPLATE_ID,
+    rating: messageConfig.TEMPLATE_MESSAGE.RATING_TEMPLATE_ID,
+    dish: messageConfig.TEMPLATE_MESSAGE.DISH_TEMPLATE_ID
+  },
+  MESSAGE_TEMPLATE: messageConfig.MESSAGE_TEMPLATES
 }
 
-// 发送菜单消息
 function sendMenuMessage(dishes, date) {
   const menuContent = dishes.map((dish, index) => `${index + 1}. ${dish.name}`).join('\n')
-  const message = CONFIG.WECHAT_MESSAGE_TEMPLATE.menu
+  const message = CONFIG.MESSAGE_TEMPLATE.MENU
     .replace('{menu}', menuContent)
     .replace('{date}', date)
-  
-  return sendWeChatMessage(message)
+
+  return sendWeChatMessage(message, CONFIG.TEMPLATE_IDS.menu)
 }
 
-// 发送评价消息
 function sendRatingMessage(ratings, time) {
   const ratingContent = ratings.map((dish, index) => {
     let content = `${index + 1}. ${dish.name}\n`
@@ -39,130 +32,73 @@ function sendRatingMessage(ratings, time) {
     }
     return content
   }).join('\n')
-  
-  const message = CONFIG.WECHAT_MESSAGE_TEMPLATE.rating
+
+  const message = CONFIG.MESSAGE_TEMPLATE.RATING
     .replace('{rating}', ratingContent)
     .replace('{time}', time)
-  
-  return sendWeChatMessage(message)
+
+  return sendWeChatMessage(message, CONFIG.TEMPLATE_IDS.rating)
 }
 
-// 发送菜品推荐消息
 function sendDishMessage(dish) {
-  const ingredients = dish.ingredients.slice(0, 5).map(ingredient => 
-    `• ${ingredient.name} ${ingredient.amount}`
-  ).join('\n')
-  
-  const message = CONFIG.WECHAT_MESSAGE_TEMPLATE.dish
+  const ingredients = dish.ingredients.slice(0, 5).map((ingredient) => `- ${ingredient.name} ${ingredient.amount}`).join('\n')
+  const message = CONFIG.MESSAGE_TEMPLATE.DISH
     .replace('{name}', dish.name)
     .replace('{difficulty}', dish.difficulty)
     .replace('{time}', dish.cookingTime)
     .replace('{servings}', dish.servings)
     .replace('{ingredients}', ingredients)
-  
-  return sendWeChatMessage(message)
+
+  return sendWeChatMessage(message, CONFIG.TEMPLATE_IDS.dish || CONFIG.TEMPLATE_IDS.menu)
 }
 
-// 发送微信消息
-function sendWeChatMessage(message) {
+function sendWeChatMessage(message, templateId) {
   return new Promise((resolve, reject) => {
-    // 直接使用模板消息（订阅消息）
-    sendTemplateMessage(message, resolve, reject)
+    sendTemplateMessage(message, templateId, resolve, reject)
   })
 }
 
-// 发送模板消息
-function sendTemplateMessage(message, resolve, reject) {
-  // 使用授权工具请求订阅消息
-  auth.requestSubscribeMessage('tLEKQiiMe8JDjm1GIGq5UDbHrZNZX0bxOhuRM0zho4g') // 替换为实际的模板ID
-    .then(() => {
-      // 用户同意，发送模板消息
-      sendTemplateMessageToServer(message)
-        .then(resolve)
-        .catch((error) => {
-          console.log('发送模板消息失败:', error)
-          // 发送失败，降级到复制功能
-          fallbackToClipboard(message, resolve, reject)
-        })
-    })
-    .catch((error) => {
-      console.log('用户拒绝授权或授权失败:', error)
-      // 降级到复制功能
-      fallbackToClipboard(message, resolve, reject)
-    })
+function sendTemplateMessage(message, templateId, resolve, reject) {
+  auth.requestSubscribeMessage(templateId)
+    .then(() => sendTemplateMessageToServer(message, templateId).then(resolve).catch(() => fallbackToClipboard(message, resolve, reject)))
+    .catch(() => fallbackToClipboard(message, resolve, reject))
 }
 
-// 发送模板消息到服务器
-function sendTemplateMessageToServer(message) {
+function sendTemplateMessageToServer(message, templateId) {
   return new Promise((resolve, reject) => {
-    // 调用云函数发送订阅消息
     wx.cloud.callFunction({
       name: 'sendMessage',
       data: {
-        message: message,
+        message,
         targetUserId: CONFIG.TARGET_USER_ID,
-        templateId: 'tLEKQiiMe8JDjm1GIGq5UDbHrZNZX0bxOhuRM0zho4g' // 替换为实际模板ID
+        templateId
       },
       success: (res) => {
-        console.log('云函数调用成功，返回结果:', res)
         if (res.result && res.result.success) {
-          console.log('云函数返回成功，检查是否有clipboard数据:', res.result.clipboard)
-          
-          if (res.result.clipboard && res.result.clipboard.ready) {
-            // 有剪贴板数据，自动复制
-            wx.setClipboardData({
-              data: res.result.clipboard.message || res.result.clipboard.content,
-              success: () => {
-                resolve({
-                  success: true,
-                  method: 'clipboard_copy',
-                  message: '消息已复制到剪贴板，请手动转发给工口园'
-                })
-              },
-              fail: () => {
-                resolve({
-                  success: true,
-                  method: 'template_message_prepared',
-                  message: '消息已准备，请手动复制转发（权限问题待解决）'
-                })
-              }
-            })
-          } else {
-            resolve({
-              success: true,
-              method: 'template_message',
-              message: '消息已发送到您的微信'
-            })
-          }
-        } else {
-          console.log('云函数返回失败:', res.result)
-          reject({
-            success: false,
-            message: res.result ? res.result.message : '模板消息发送失败',
-            errCode: res.result ? res.result.errCode : null,
-            solution: res.result ? res.result.solution : null
+          resolve({
+            success: true,
+            method: 'template_message',
+            message: '消息已处理完成'
           })
+          return
         }
+
+        reject(new Error(res.result ? res.result.message : '模板消息发送失败'))
       },
-      fail: (error) => {
-        console.error('云函数调用失败:', error)
-        reject({
-          success: false,
-          message: '网络请求失败，请检查云函数配置'
-        })
+      fail: () => {
+        reject(new Error('云函数调用失败'))
       }
     })
   })
 }
 
-// 降级方案：复制到剪贴板
 function fallbackToClipboard(message, resolve, reject) {
   wx.setClipboardData({
     data: message,
     success: () => {
       wx.showModal({
         title: '消息已复制',
-        content: `消息已复制到剪贴板，请打开微信粘贴发送给${CONFIG.TARGET_NICKNAME}`,
+        content: `消息已复制到剪贴板，请手动转发给${CONFIG.TARGET_NICKNAME}`,
         showCancel: false,
         confirmText: '知道了',
         success: () => {
@@ -174,8 +110,7 @@ function fallbackToClipboard(message, resolve, reject) {
         }
       })
     },
-    fail: (err) => {
-      console.error('复制失败', err)
+    fail: () => {
       reject({
         success: false,
         message: '复制失败，请重试'
@@ -184,39 +119,6 @@ function fallbackToClipboard(message, resolve, reject) {
   })
 }
 
-// 降级方案：使用分享功能
-function fallbackToShare(message, resolve, reject) {
-  wx.showModal({
-    title: '发送消息',
-    content: message,
-    showCancel: true,
-    cancelText: '取消',
-    confirmText: '分享',
-    success: (res) => {
-      if (res.confirm) {
-        // 触发分享
-        wx.showShareMenu({
-          withShareTicket: true,
-          menus: ['shareAppMessage', 'shareTimeline']
-        })
-        
-        resolve({
-          success: true,
-          method: 'share',
-          message: '请通过分享功能发送消息'
-        })
-      } else {
-        reject({
-          success: false,
-          message: '用户取消发送'
-        })
-      }
-    }
-  })
-}
-
-
-// 复制到剪贴板
 function copyToClipboard(text) {
   return new Promise((resolve, reject) => {
     wx.setClipboardData({
@@ -226,17 +128,13 @@ function copyToClipboard(text) {
           title: '已复制到剪贴板',
           icon: 'success'
         })
-        resolve({
-          success: true,
-          message: '已复制到剪贴板'
-        })
+        resolve({ success: true, message: '已复制到剪贴板' })
       },
       fail: reject
     })
   })
 }
 
-// 获取当前时间
 function getCurrentTime() {
   const now = new Date()
   const year = now.getFullYear()
@@ -244,7 +142,7 @@ function getCurrentTime() {
   const day = now.getDate()
   const hour = now.getHours()
   const minute = now.getMinutes()
-  
+
   return `${year}年${month}月${day}日 ${hour}:${minute.toString().padStart(2, '0')}`
 }
 

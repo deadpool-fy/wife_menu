@@ -1,7 +1,7 @@
 // 云开发API服务
 class CloudApiService {
   constructor() {
-    this.env = 'cloud1-5ga4h58zc0ea35dc';
+    this.env = 'cloud1-your-env-id';
   }
 
   // 调用云函数

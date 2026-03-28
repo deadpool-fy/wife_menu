@@ -94,9 +94,11 @@
           <text class="meta-pill">{{item.parsedRecipe.cookingTime}}</text>
         </view>
         <view class="draft-preview">
-          <text class="preview-label">食材 {{item.parsedRecipe.ingredients.length}} 项</text>
-          <text class="preview-label">步骤 {{item.parsedRecipe.steps.length}} 步</text>
+          <text class="preview-label" wx:if="{{item.sourceImages && item.sourceImages.length}}">?? {{item.sourceImages.length}} ?</text>
+          <text class="preview-label">?? {{item.parsedRecipe.ingredients.length}} ?</text>
+          <text class="preview-label">?? {{item.parsedRecipe.steps.length}} ?</text>
         </view>
+        <text class="draft-ocr" wx:if="{{item.ocrText}}">?????{{item.ocrText}}</text>
         <view class="draft-actions">
           <view class="ghost-btn mini-btn" bindtap="copyDraftText" data-text="{{item.originalText}}">复制原文</view>
           <view class="danger-btn mini-btn" bindtap="rejectDraft" data-id="{{item._id}}">驳回</view>

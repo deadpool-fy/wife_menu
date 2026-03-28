@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="76af1e60-27b3-44f8-b186-7f258603106f" name="Changes" comment="1" />
+    <list default="true" id="76af1e60-27b3-44f8-b186-7f258603106f" name="Changes" comment="1">
+      <change beforePath="$PROJECT_DIR$/cloudfunctions/recipe-manager/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/cloudfunctions/recipe-manager/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/recipe-import/recipe-import.wxss" beforeDir="false" afterPath="$PROJECT_DIR$/pages/recipe-import/recipe-import.wxss" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

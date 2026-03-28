@@ -5,7 +5,7 @@ console.log('开始测试云API服务...');
 
 // 初始化云开发
 wx.cloud.init({
-  env: 'cloud1-5ga4h58zc0ea35dc',
+  env: 'cloud1-your-env-id',
   traceUser: true,
 });
 

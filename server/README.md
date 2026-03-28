@@ -26,10 +26,10 @@ npm install
 
 ```javascript
 const WECHAT_CONFIG = {
-  appId: 'wx5783986edcbaba40', // 您的小程序AppID
+  appId: 'wx-your-app-id', // 您的小程序AppID
   appSecret: 'your_app_secret', // 替换为实际的AppSecret
   templateId: 'your_template_id', // 替换为实际的模板ID
-  targetUserId: 'Dingding7654321_' // 目标用户微信ID
+  targetUserId: 'your-target-wechat-id' // 目标用户微信ID
 };
 ```
 

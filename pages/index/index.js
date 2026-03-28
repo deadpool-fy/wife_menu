@@ -10,7 +10,11 @@ Page({
     loading: false,
     error: null,
     todayMood: '适合安排一顿有仪式感的家常晚餐',
-    heroTip: '从推荐里挑几道顺眼的，立刻就能拼出一份像认真准备过的菜单。'
+    heroTip: '从推荐里挑几道顺眼的，立刻就能拼出一份像认真准备过的菜单。',
+    sharePanelVisible: false,
+    shareTitle: '',
+    shareSummary: '',
+    sharePath: '/pages/index/index'
   },
 
   onLoad() {
@@ -313,29 +317,23 @@ Page({
   },
 
   shareMenuToFriend(selectedDishes) {
-    let content = '今日菜单：\n\n'
+    const dishNames = selectedDishes.map((dish) => dish.name)
+    const summary = dishNames.slice(0, 4).join('、')
+    const shareTitle = dishNames.length > 2
+      ? `今晚想做 ${dishNames[0]}、${dishNames[1]}，帮我看看这份菜单怎么样`
+      : `今晚吃什么？我选了 ${dishNames.join('、')}`
 
-    selectedDishes.forEach((dish, index) => {
-      content += `${index + 1}. ${dish.name}\n`
+    this.setData({
+      sharePanelVisible: true,
+      shareTitle,
+      shareSummary: summary,
+      sharePath: `/pages/index/index?from=share&menu=${encodeURIComponent(dishNames.join(','))}`
     })
+  },
 
-    content += `\n时间：${this.data.currentDate}`
-
-    wx.setClipboardData({
-      data: content,
-      success: () => {
-        wx.showModal({
-          title: '菜单已复制',
-          content: '菜单内容已复制到剪贴板，可以直接发送给家人或朋友。',
-          showCancel: false
-        })
-      },
-      fail: () => {
-        wx.showToast({
-          title: '复制失败',
-          icon: 'none'
-        })
-      }
+  closeSharePanel() {
+    this.setData({
+      sharePanelVisible: false
     })
   },
 
@@ -346,9 +344,11 @@ Page({
   },
 
   onShareAppMessage() {
+    const { shareTitle, shareSummary, sharePath } = this.data
     return {
-      title: '今晚吃什么？来这里挑一份更好看的家庭菜单',
-      path: '/pages/index/index'
+      title: shareTitle || '今晚吃什么？来这里挑一份更好看的家庭菜单',
+      desc: shareSummary || '我在这里整理了一份更顺眼的晚餐菜单，打开就能直接选。',
+      path: sharePath || '/pages/index/index'
     }
   }
 })

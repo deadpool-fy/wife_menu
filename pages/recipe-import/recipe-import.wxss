@@ -104,6 +104,17 @@
   line-height: 1.6;
 }
 
+.draft-ocr {
+  display: block;
+  margin-top: 14rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 244, 232, 0.88);
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
 .draft-meta,
 .draft-preview,
 .draft-actions {

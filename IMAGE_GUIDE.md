@@ -52,7 +52,7 @@
 ```javascript
 // 测试图片加载
 wx.cloud.init({
-  env: 'cloud1-5ga4h58zc0ea35dc',
+  env: 'cloud1-your-env-id',
   traceUser: true,
 });
 

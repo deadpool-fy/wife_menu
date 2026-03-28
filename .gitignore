@@ -12,3 +12,11 @@ $RECYCLE.BIN/
 
 # Node.js
 node_modules/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+config/private.js
+server/.env
+server/crawler/.env

@@ -19,7 +19,7 @@
 ```javascript
 // 快速初始化数据库
 wx.cloud.init({
-  env: 'cloud1-5ga4h58zc0ea35dc',
+  env: 'cloud1-your-env-id',
   traceUser: true,
 });
 

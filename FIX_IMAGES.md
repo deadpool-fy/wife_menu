@@ -44,7 +44,7 @@
 ```javascript
 // 清理旧数据并重新初始化
 wx.cloud.init({
-  env: 'cloud1-5ga4h58zc0ea35dc',
+  env: 'cloud1-your-env-id',
   traceUser: true,
 });
 
