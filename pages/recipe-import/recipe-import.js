@@ -3,10 +3,11 @@ const cloudApiService = require('../../utils/cloudApi.js')
 Page({
   data: {
     sourcePlatforms: [
-      { label: '手动整理', value: 'manual' },
+      { label: '自动识别', value: 'auto' },
       { label: '小红书', value: 'xiaohongshu' },
       { label: '抖音', value: 'douyin' },
-      { label: '快手', value: 'kuaishou' }
+      { label: '快手', value: 'kuaishou' },
+      { label: '手动整理', value: 'manual' }
     ],
     sourcePlatformIndex: 0,
     sourceUrl: '',
@@ -15,7 +16,7 @@ Page({
     drafts: [],
     loadingDrafts: false,
     submitting: false,
-    reviewNote: ''
+    autoImporting: false
   },
 
   onLoad() {
@@ -50,6 +51,54 @@ Page({
     })
   },
 
+  getCurrentPlatformValue() {
+    const currentPlatform = this.data.sourcePlatforms[this.data.sourcePlatformIndex]
+    return currentPlatform.value === 'auto' ? '' : currentPlatform.value
+  },
+
+  async autoImport() {
+    if (!this.data.sourceUrl.trim()) {
+      wx.showToast({
+        title: '请先粘贴第三方链接',
+        icon: 'none'
+      })
+      return
+    }
+
+    this.setData({ autoImporting: true })
+
+    try {
+      const result = await cloudApiService.autoImportByUrl({
+        sourcePlatform: this.getCurrentPlatformValue(),
+        sourceUrl: this.data.sourceUrl.trim()
+      })
+
+      if (!result.success) {
+        throw new Error(result.message || '自动解析失败')
+      }
+
+      wx.showToast({
+        title: '已自动生成草稿',
+        icon: 'success'
+      })
+
+      this.setData({
+        sourceUrl: '',
+        sourceTitle: '',
+        rawText: ''
+      })
+
+      await this.loadDrafts()
+    } catch (error) {
+      wx.showToast({
+        title: error.message || '自动解析失败',
+        icon: 'none'
+      })
+    } finally {
+      this.setData({ autoImporting: false })
+    }
+  },
+
   async submitImport() {
     if (!this.data.sourceUrl.trim() && !this.data.sourceTitle.trim() && !this.data.rawText.trim()) {
       wx.showToast({
@@ -62,9 +111,8 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      const currentPlatform = this.data.sourcePlatforms[this.data.sourcePlatformIndex]
       const result = await cloudApiService.createImportDraft({
-        sourcePlatform: currentPlatform.value,
+        sourcePlatform: this.getCurrentPlatformValue() || 'manual',
         sourceUrl: this.data.sourceUrl.trim(),
         title: this.data.sourceTitle.trim(),
         rawText: this.data.rawText.trim()

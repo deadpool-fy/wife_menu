@@ -4,6 +4,10 @@
   gap: 18rpx;
 }
 
+.compact-stack {
+  gap: 16rpx;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -38,12 +42,19 @@
   min-height: 320rpx;
 }
 
-.submit-row {
+.submit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
   margin-top: 20rpx;
 }
 
 .submit-btn {
   width: 100%;
+}
+
+.import-tip {
+  margin-top: 18rpx;
 }
 
 .action-pill,

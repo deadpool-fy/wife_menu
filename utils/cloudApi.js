@@ -54,6 +54,10 @@ class CloudApiService {
     return await this.callCloudFunction('recipe-manager', 'createImportDraft', payload);
   }
 
+  async autoImportByUrl(payload) {
+    return await this.callCloudFunction('recipe-manager', 'autoImportByUrl', payload);
+  }
+
   async getImportDrafts(params = {}) {
     return await this.callCloudFunction('recipe-manager', 'getImportDrafts', params);
   }

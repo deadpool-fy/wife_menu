@@ -2,18 +2,18 @@
   <view class="hero-card rise-enter">
     <view class="hero-eyebrow">
       <text>IMPORT ASSISTANT</text>
-      <text>半自动导入</text>
+      <text>自动导入</text>
     </view>
-    <view class="hero-title">先把第三方内容导进草稿池，再决定哪些值得真正入库。</view>
-    <view class="hero-subtitle">这版先支持“链接 + 原始文本”的半自动导入，不直接自动上架，先把风险和质量控制住。</view>
+    <view class="hero-title">贴一个第三方链接，先自动抓成草稿，再决定要不要入库。</view>
+    <view class="hero-subtitle">默认优先走自动解析，识别不完整时再补一点标题或正文，不再要求先整段复制粘贴。</view>
   </view>
 
   <view class="surface-card section-shell fade-enter">
     <view class="section-head">
       <view class="section-title-wrap">
-        <text class="section-kicker">SUBMIT</text>
-        <text class="section-title">创建导入草稿</text>
-        <text class="section-subtitle">建议把第三方页面里的标题、正文、食材和步骤粘进来，系统会先做一轮粗解析。</text>
+        <text class="section-kicker">AUTO IMPORT</text>
+        <text class="section-title">链接自动解析</text>
+        <text class="section-subtitle">把第三方分享链接贴进来，系统会自动提取标题、简介、封面和可识别的菜谱信息，先进入待审核队列。</text>
       </view>
     </view>
 
@@ -27,24 +27,43 @@
 
       <view class="field">
         <text class="field-label">第三方链接</text>
-        <input class="field-input" placeholder="可选，先记录来源链接" value="{{sourceUrl}}" bindinput="onUrlInput" />
-      </view>
-
-      <view class="field">
-        <text class="field-label">手动标题</text>
-        <input class="field-input" placeholder="如果系统不好识别标题，可以在这里手动补充" value="{{sourceTitle}}" bindinput="onTitleInput" />
-      </view>
-
-      <view class="field">
-        <text class="field-label">原始菜谱文本</text>
-        <textarea class="field-textarea large-textarea" placeholder="把第三方平台里的正文、食材、步骤、小贴士直接粘贴进来，系统会自动切成待审核结构。" value="{{rawText}}" bindinput="onRawTextInput"></textarea>
+        <input class="field-input" placeholder="粘贴小红书、抖音或网页链接" value="{{sourceUrl}}" bindinput="onUrlInput" />
       </view>
     </view>
 
-    <view class="submit-row">
-      <button class="primary-btn submit-btn" bindtap="submitImport" disabled="{{submitting}}">
-        {{submitting ? '处理中...' : '创建待审核草稿'}}
+    <view class="submit-grid">
+      <button class="primary-btn submit-btn" bindtap="autoImport" disabled="{{autoImporting}}">
+        {{autoImporting ? '解析中...' : '自动解析链接'}}
       </button>
+      <button class="ghost-btn submit-btn" bindtap="submitImport" disabled="{{submitting}}">
+        {{submitting ? '处理中...' : '手动补充创建草稿'}}
+      </button>
+    </view>
+
+    <view class="feedback-banner import-tip">
+      自动解析适合大多数公开分享页；如果平台拦截过严或内容识别不完整，可以继续往下补标题和正文再提交。
+    </view>
+  </view>
+
+  <view class="surface-card section-shell fade-enter">
+    <view class="section-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">FALLBACK</text>
+        <text class="section-title">识别不完整时补充</text>
+        <text class="section-subtitle">这里只在自动解析不够用时再填，能少填就少填。</text>
+      </view>
+    </view>
+
+    <view class="form-stack compact-stack">
+      <view class="field">
+        <text class="field-label">手动标题</text>
+        <input class="field-input" placeholder="自动识别不到标题时再补" value="{{sourceTitle}}" bindinput="onTitleInput" />
+      </view>
+
+      <view class="field">
+        <text class="field-label">原始内容</text>
+        <textarea class="field-textarea large-textarea" placeholder="只在需要时补正文、食材或步骤，系统会继续粗解析。" value="{{rawText}}" bindinput="onRawTextInput"></textarea>
+      </view>
     </view>
   </view>
 
@@ -53,7 +72,7 @@
       <view class="section-title-wrap">
         <text class="section-kicker">REVIEW QUEUE</text>
         <text class="section-title">待审核草稿</text>
-        <text class="section-subtitle">这里只展示待审核项，通过后进入正式菜谱库，驳回则留痕但不上架。</text>
+        <text class="section-subtitle">自动导入和手动补充都会先到这里，审核通过后再进入正式菜谱库。</text>
       </view>
       <view class="ghost-btn action-pill" bindtap="loadDrafts">刷新</view>
     </view>
@@ -88,7 +107,7 @@
 
     <view class="empty-panel" wx:else>
       <text class="empty-title">{{loadingDrafts ? '正在加载草稿...' : '还没有待审核草稿'}}</text>
-      <text class="empty-desc">先导入一条链接或一段原始文本，这里就会出现对应的待审核内容。</text>
+      <text class="empty-desc">先贴一个第三方链接试试，自动解析成功后这里就会出现对应草稿。</text>
     </view>
   </view>
 </view>
