@@ -1,0 +1,22 @@
+{"level":"info","message":"🚀 正在启动小红书菜谱爬虫服务...","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:19:47"}
+{"level":"info","message":"OCR_ONLY_MODE ????????????","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:19:47"}
+{"level":"info","message":"OCR_ONLY_MODE ??????????","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:19:47"}
+{"level":"info","message":"🎉 服务器启动成功: http://localhost:3001","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:19:47"}
+{"level":"info","message":"📚 API文档: http://localhost:3001/api","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:19:47"}
+{"level":"info","message":"💚 健康检查: http://localhost:3001/api/health","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:19:47"}
+{"level":"info","message":"🚀 正在启动小红书菜谱爬虫服务...","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:18"}
+{"level":"info","message":"OCR_ONLY_MODE ????????????","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:18"}
+{"level":"info","message":"OCR_ONLY_MODE ??????????","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:18"}
+{"level":"info","message":"🎉 服务器启动成功: http://localhost:3001","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:18"}
+{"level":"info","message":"📚 API文档: http://localhost:3001/api","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:18"}
+{"level":"info","message":"💚 健康检查: http://localhost:3001/api/health","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:18"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [28/Mar/2026:09:37:49 +0000] \"GET / HTTP/1.1\" 200 135 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.7920\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:37:49"}
+{"level":"info","message":"::1 - - [28/Mar/2026:09:42:35 +0000] \"POST /api/ocr/images HTTP/1.1\" - - \"-\" \"-\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:42:35"}
+{"level":"info","message":"::1 - - [28/Mar/2026:09:53:06 +0000] \"POST /api/ocr/images HTTP/1.1\" - - \"-\" \"-\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:53:06"}
+{"level":"info","message":"::1 - - [28/Mar/2026:09:53:53 +0000] \"POST /api/ocr/images HTTP/1.1\" - - \"-\" \"-\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:53:53"}
+{"level":"info","message":"::1 - - [28/Mar/2026:09:54:33 +0000] \"POST /api/ocr/images HTTP/1.1\" - - \"-\" \"-\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 17:54:33"}
+{"level":"info","message":"::1 - - [28/Mar/2026:10:02:58 +0000] \"POST /api/ocr/images HTTP/1.1\" - - \"-\" \"-\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 18:02:58"}
+{"level":"info","message":"::1 - - [28/Mar/2026:10:05:16 +0000] \"POST /api/ocr/images HTTP/1.1\" - - \"-\" \"-\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 18:05:16"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [28/Mar/2026:10:06:15 +0000] \"GET / HTTP/1.1\" 200 135 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.7920\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 18:06:15"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [28/Mar/2026:10:07:54 +0000] \"GET / HTTP/1.1\" 200 135 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-CN) WindowsPowerShell/5.1.26100.7920\"","service":"xiaohongshu-crawler","timestamp":"2026-03-28 18:07:54"}
+{"level":"info","message":"📴 收到 SIGINT 信号，正在优雅关闭服务...","service":"xiaohongshu-crawler","timestamp":"2026-03-28 18:18:36"}

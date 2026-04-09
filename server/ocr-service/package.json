@@ -1,0 +1,19 @@
+{
+  "name": "wife-menu-ocr-service",
+  "version": "1.0.0",
+  "description": "OCR service for Wife Menu CloudBase hosting",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "tesseract.js": "^5.1.1"
+  }
+}

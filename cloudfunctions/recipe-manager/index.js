@@ -33,6 +33,8 @@ exports.main = async (event) => {
         return await autoImportByUrl(data)
       case 'getImportDrafts':
         return await getImportDrafts(data)
+      case 'runImportDraftOcr':
+        return await runImportDraftOcr(data)
       case 'approveImportDraft':
         return await approveImportDraft(data)
       case 'rejectImportDraft':
@@ -257,6 +259,7 @@ async function createImportDraft(data) {
     sourcePlatform,
     sourceUrl,
     rawText,
+    ocrDiagnostics: null,
     parsedRecipe: {
       ...parsed,
       title
@@ -303,6 +306,7 @@ async function autoImportByUrl(data) {
     rawText,
     sourceImages: fetchedRecipe.sourceImages || [],
     ocrText: fetchedRecipe.ocrText || '',
+    ocrDiagnostics: fetchedRecipe.ocrDiagnostics || null,
     parsedRecipe: {
       ...parsedRecipe,
       title
@@ -353,6 +357,81 @@ async function getImportDrafts(data) {
       total: countResult.total,
       page: Number(page),
       limit: Number(limit)
+    }
+  }
+}
+
+async function runImportDraftOcr(data) {
+  const { id } = data
+  if (!id) {
+    throw new Error('?? ID ????')
+  }
+
+  const draftResult = await db.collection('recipe_imports').doc(id).get()
+  const draft = draftResult.data
+  if (!draft) {
+    throw new Error('???????')
+  }
+
+  if (draft.status !== 'pending') {
+    throw new Error('?????????? OCR')
+  }
+
+  const sourceImages = Array.isArray(draft.sourceImages) ? draft.sourceImages.filter(Boolean) : []
+  if (!sourceImages.length) {
+    throw new Error('????????????')
+  }
+
+  const hasProvidedOcr = typeof data.ocrText === 'string' || data.ocrDiagnostics
+  const ocrResult = hasProvidedOcr
+    ? {
+        text: String(data.ocrText || '').trim(),
+        diagnostics: data.ocrDiagnostics || null
+      }
+    : await tryRecognizeImagesByOcr(sourceImages)
+  const ocrText = String(ocrResult.text || '').trim()
+  const mergedRawText = [draft.originalText, ocrText].filter(Boolean).join('\n')
+  const parsedRecipe = mergeImportedRecipe(parseImportedRecipe(mergedRawText), {
+    ...draft.parsedRecipe,
+    sourceImages,
+    ocrText,
+    ocrDiagnostics: ocrResult.diagnostics || null,
+    image: draft.parsedRecipe?.image || sourceImages[0] || ''
+  })
+
+  await db.collection('recipe_imports').doc(id).update({
+    data: {
+      originalText: mergedRawText || draft.originalText || '',
+      ocrText,
+      ocrDiagnostics: ocrResult.diagnostics || null,
+      parsedRecipe: {
+        ...draft.parsedRecipe,
+        ...parsedRecipe,
+        title: parsedRecipe.title || draft.parsedRecipe?.title || '',
+        description: parsedRecipe.description || draft.parsedRecipe?.description || '',
+        image: parsedRecipe.image || draft.parsedRecipe?.image || sourceImages[0] || '',
+        category: parsedRecipe.category || draft.parsedRecipe?.category || '???',
+        difficulty: parsedRecipe.difficulty || draft.parsedRecipe?.difficulty || '??',
+        cookingTime: parsedRecipe.cookingTime || draft.parsedRecipe?.cookingTime || '30??',
+        servings: parsedRecipe.servings || draft.parsedRecipe?.servings || 2,
+        calories: parsedRecipe.calories || draft.parsedRecipe?.calories || 200,
+        ingredients: normalizeIngredients(parsedRecipe.ingredients),
+        steps: normalizeSteps(parsedRecipe.steps),
+        tags: normalizeTags(parsedRecipe.tags),
+        author: parsedRecipe.author || draft.parsedRecipe?.author || sourcePlatformLabel(draft.sourcePlatform),
+        sourceUrl: draft.sourceUrl || draft.parsedRecipe?.sourceUrl || ''
+      },
+      updatedAt: new Date()
+    }
+  })
+
+  return {
+    success: true,
+    message: ocrText ? 'OCR ????????' : 'OCR ??????????????',
+    data: {
+      id,
+      ocrText,
+      ocrDiagnostics: ocrResult.diagnostics || null
     }
   }
 }
@@ -473,7 +552,7 @@ function buildRecipeRecord(data) {
   }
 }
 
-function buildImportDraftRecord({ sourcePlatform, sourceUrl, rawText, sourceImages = [], ocrText = '', parsedRecipe }) {
+function buildImportDraftRecord({ sourcePlatform, sourceUrl, rawText, sourceImages = [], ocrText = '', ocrDiagnostics = null, parsedRecipe }) {
   return {
     status: 'pending',
     sourcePlatform,
@@ -481,6 +560,7 @@ function buildImportDraftRecord({ sourcePlatform, sourceUrl, rawText, sourceImag
     originalText: rawText,
     sourceImages,
     ocrText,
+    ocrDiagnostics,
     parsedRecipe: {
       title: parsedRecipe.title,
       description: parsedRecipe.description || '待审核导入草稿，请补充更完整的简介。',
@@ -733,7 +813,16 @@ async function fetchThirdPartyRecipe(sourceUrl, sourcePlatform) {
 
   const html = await fetchPageHtml(sourceUrl)
   const metadata = extractRecipeMetadataFromHtml(html, sourceUrl)
-  const ocrText = await tryRecognizeImagesByOcr(metadata.sourceImages || [])
+  const shouldRunSyncOcr = String(process.env.IMPORT_OCR_SYNC || '').toLowerCase() === 'true'
+  const ocrResult = shouldRunSyncOcr
+    ? await tryRecognizeImagesByOcr(metadata.sourceImages || [])
+    : {
+        text: '',
+        diagnostics: {
+          status: 'ocr_deferred'
+        }
+      }
+  const ocrText = ocrResult.text || ''
 
   if (!metadata.title && !metadata.description && !metadata.bodyText && !ocrText) {
     throw new Error('当前链接暂时无法自动解析，建议稍后换链接重试')
@@ -744,6 +833,7 @@ async function fetchThirdPartyRecipe(sourceUrl, sourcePlatform) {
     sourceUrl,
     sourceImages: metadata.sourceImages || [],
     ocrText,
+    ocrDiagnostics: ocrResult.diagnostics || null,
     author: metadata.author || sourcePlatformLabel(sourcePlatform),
     category: metadata.category || inferCategoryFromText(metadata.title, metadata.description, metadata.bodyText),
     difficulty: metadata.difficulty || inferDifficultyFromText(metadata.title, metadata.description, metadata.bodyText),
@@ -780,12 +870,22 @@ async function tryFetchFromExternalCrawler(sourceUrl, sourcePlatform) {
 async function tryRecognizeImagesByOcr(sourceImages) {
   const images = (sourceImages || []).filter(Boolean).slice(0, 9)
   if (!images.length) {
-    return ''
+    return {
+      text: '',
+      diagnostics: {
+        status: 'no_images'
+      }
+    }
   }
 
-  const baseUrl = process.env.IMPORT_OCR_BASE_URL
+  const baseUrl = process.env.IMPORT_OCR_BASE_URL || 'https://wife-menu-ocr-239718-10-1380957963.sh.run.tcloudbase.com/api'
   if (!baseUrl) {
-    return ''
+    return {
+      text: '',
+      diagnostics: {
+        status: 'ocr_service_not_configured'
+      }
+    }
   }
 
   try {
@@ -797,13 +897,34 @@ async function tryRecognizeImagesByOcr(sourceImages) {
     )
     const response = JSON.parse(responseText)
     if (!response || !response.success) {
-      return ''
+      return {
+        text: '',
+        diagnostics: {
+          status: 'ocr_service_returned_error'
+        }
+      }
     }
 
-    return String(response.text || response.data?.text || '').trim()
+    return {
+      text: String(response.text || response.data?.text || '').trim(),
+      diagnostics: {
+        status: 'ok',
+        requestedCount: images.length,
+        recognizedCount: Number(response.diagnostics?.recognizedCount || 0),
+        emptyCount: Number(response.diagnostics?.emptyCount || 0),
+        failedCount: Number(response.diagnostics?.failedCount || 0),
+        results: Array.isArray(response.data?.results) ? response.data.results : []
+      }
+    }
   } catch (error) {
     console.warn('ocr service unavailable:', error.message)
-    return ''
+    return {
+      text: '',
+      diagnostics: {
+        status: 'ocr_service_unavailable',
+        message: error.message
+      }
+    }
   }
 }
 
@@ -933,7 +1054,7 @@ function extractRecipeMetadataFromHtml(html, sourceUrl) {
   ])
 
   return {
-    title: cleanText(title),
+    title: sanitizeImportedTitle(cleanText(title)),
     description: cleanText(description),
     image: normalizeAssetUrl(image, sourceUrl),
     sourceImages,
@@ -1085,6 +1206,20 @@ function cleanText(text) {
     .replace(/\s+/g, ' ')
     .replace(/[\u0000-\u001F]/g, '')
     .trim()
+}
+
+function sanitizeImportedTitle(title) {
+  const normalized = String(title || '').replace(/\s+/g, ' ').trim()
+  const compact = normalized.replace(/[\uFF5C\u4E28]/g, '|')
+  const parts = compact.split(/\s*[-|]\s*/)
+  const suffix = parts.length > 1 ? String(parts[parts.length - 1] || '').toLowerCase() : ''
+  const platformKeywords = ['\u5c0f\u7ea2\u4e66', '\u6296\u97f3', '\u5feb\u624b', '\u5fae\u535a', '\u77e5\u4e4e', '\u54d4\u54e9\u54d4\u54e9', 'bilibili', '\u817e\u8baf\u89c6\u9891', '\u4f18\u9177', '\u5b98\u7f51', '\u7f51\u9875']
+
+  if (suffix && platformKeywords.some((keyword) => suffix.includes(String(keyword).toLowerCase()))) {
+    return parts.slice(0, -1).join(' - ').trim()
+  }
+
+  return normalized
 }
 
 function decodeHtmlEntities(text) {

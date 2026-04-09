@@ -13,7 +13,8 @@ class CrawlerServer {
   constructor() {
     this.app = express();
     this.port = process.env.PORT || 3001;
-    this.cronManager = new CronJobManager();
+    this.ocrOnlyMode = String(process.env.OCR_ONLY_MODE || '').toLowerCase() === 'true';
+    this.cronManager = this.ocrOnlyMode ? null : new CronJobManager();
   }
 
   // 初始化中间件
@@ -53,6 +54,7 @@ class CrawlerServer {
         message: '小红书菜谱爬虫服务',
         version: '1.0.0',
         status: 'running',
+        mode: this.ocrOnlyMode ? 'ocr-only' : 'full',
         timestamp: new Date().toISOString()
       });
     });
@@ -78,6 +80,11 @@ class CrawlerServer {
 
   // 初始化数据库
   async initDatabase() {
+    if (this.ocrOnlyMode) {
+      logger.info('OCR_ONLY_MODE ????????????');
+      return;
+    }
+
     try {
       logger.info('🔗 正在连接数据库...');
       
@@ -98,6 +105,11 @@ class CrawlerServer {
 
   // 启动定时任务
   startCronJobs() {
+    if (this.ocrOnlyMode || !this.cronManager) {
+      logger.info('OCR_ONLY_MODE ??????????');
+      return;
+    }
+
     try {
       this.cronManager.startAllJobs();
       logger.info('⏰ 定时任务已启动');

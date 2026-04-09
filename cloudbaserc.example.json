@@ -1,0 +1,14 @@
+{
+  "envId": "cloud1-your-env-id",
+  "functionRoot": "./cloudfunctions",
+  "functions": [
+    {
+      "name": "recipe-manager",
+      "timeout": 20,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "installDependency": true,
+      "handler": "index.main"
+    }
+  ]
+}

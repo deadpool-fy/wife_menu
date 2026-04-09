@@ -1,7 +1,10 @@
+const secureConfig = require('../config/secureConfig.js');
+
 // 云开发API服务
 class CloudApiService {
   constructor() {
-    this.env = 'cloud1-your-env-id';
+    this.env = secureConfig.cloudEnvId || 'cloud1-your-env-id';
+    this.ocrServiceName = 'wife-menu-ocr';
   }
 
   // 调用云函数
@@ -60,6 +63,32 @@ class CloudApiService {
 
   async getImportDrafts(params = {}) {
     return await this.callCloudFunction('recipe-manager', 'getImportDrafts', params);
+  }
+
+  async runImportDraftOcr(payload) {
+    return await this.callCloudFunction('recipe-manager', 'runImportDraftOcr', payload);
+  }
+
+  async runOcrInContainer(images = []) {
+    const config = {};
+    if (this.env && this.env !== 'cloud1-your-env-id') {
+      config.env = this.env;
+    }
+
+    const response = await wx.cloud.callContainer({
+      config,
+      path: '/api/ocr/images',
+      method: 'POST',
+      header: {
+        'X-WX-SERVICE': this.ocrServiceName,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        images
+      }
+    });
+
+    return response.data || response.result || response;
   }
 
   async approveImportDraft(payload) {

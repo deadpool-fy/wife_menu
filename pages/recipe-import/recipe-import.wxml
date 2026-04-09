@@ -89,22 +89,23 @@
         <text class="draft-title">{{item.parsedRecipe.title}}</text>
         <text class="draft-desc">{{item.parsedRecipe.description}}</text>
         <view class="draft-meta">
-          <text class="meta-pill">{{item.parsedRecipe.category}}</text>
-          <text class="meta-pill">{{item.parsedRecipe.difficulty}}</text>
-          <text class="meta-pill">{{item.parsedRecipe.cookingTime}}</text>
+          <text class="meta-pill">{{item.categoryLabel}}</text>
+          <text class="meta-pill">{{item.difficultyLabel}}</text>
+          <text class="meta-pill">{{item.cookingTimeLabel}}</text>
         </view>
         <view class="draft-preview">
-          <text class="preview-label" wx:if="{{item.sourceImages && item.sourceImages.length}}">?? {{item.sourceImages.length}} ?</text>
-          <text class="preview-label">?? {{item.parsedRecipe.ingredients.length}} ?</text>
-          <text class="preview-label">?? {{item.parsedRecipe.steps.length}} ?</text>
+          <text class="preview-label">{{item.imageCountLabel}}</text>
+          <text class="preview-label">{{item.ingredientCountLabel}}</text>
+          <text class="preview-label">{{item.stepCountLabel}}</text>
         </view>
-        <text class="draft-ocr" wx:if="{{item.ocrText}}">?????{{item.ocrText}}</text>
+        <text class="draft-ocr" wx:if="{{item.ocrPreview}}">{{item.ocrPreview}}</text>
+        <text class="draft-ocr draft-ocr-diagnostics" wx:if="{{item.ocrDiagnosticsLabel}}">{{item.ocrDiagnosticsLabel}}</text>
         <view class="draft-actions">
-          <view class="ghost-btn mini-btn" bindtap="copyDraftText" data-text="{{item.originalText}}">复制原文</view>
-          <view class="danger-btn mini-btn" bindtap="rejectDraft" data-id="{{item._id}}">驳回</view>
-          <view class="primary-btn mini-btn" bindtap="approveDraft" data-id="{{item._id}}">通过并入库</view>
-        </view>
-      </view>
+          <view class="ghost-btn mini-btn" wx:if="{{item.sourceImages && item.sourceImages.length}}" bindtap="runDraftOcr" data-id="{{item._id}}">?? OCR</view>
+          <view class="ghost-btn mini-btn" bindtap="copyDraftText" data-text="{{item.originalText}}">????</view>
+          <view class="danger-btn mini-btn" bindtap="rejectDraft" data-id="{{item._id}}">??</view>
+          <view class="primary-btn mini-btn" bindtap="approveDraft" data-id="{{item._id}}">?????</view>
+        </view>      </view>
     </view>
 
     <view class="empty-panel" wx:else>

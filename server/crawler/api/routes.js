@@ -175,6 +175,12 @@ router.post('/ocr/images', async (req, res) => {
     res.json({
       success: true,
       text: result.text,
+      diagnostics: {
+        requestedCount: images.length,
+        recognizedCount: result.results.filter((item) => item.status === 'recognized').length,
+        emptyCount: result.results.filter((item) => item.status === 'empty_text').length,
+        failedCount: result.results.filter((item) => item.status === 'download_or_ocr_failed').length
+      },
       data: result
     })
   } catch (error) {
