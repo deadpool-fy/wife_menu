@@ -304,37 +304,51 @@ Page({
       const sourceImages = draft && Array.isArray(draft.sourceImages) ? draft.sourceImages.filter(Boolean) : []
 
       if (!sourceImages.length) {
-        throw new Error('????????????')
+        throw new Error('当前草稿没有可识别的图片')
       }
 
-      wx.showLoading({ title: '?????...' })
-      const ocrResponse = typeof cloudApiService.runOcrInContainer === 'function'
-        ? await cloudApiService.runOcrInContainer(sourceImages)
-        : await callContainerOcr(sourceImages)
-      if (!ocrResponse || !ocrResponse.success) {
-        throw new Error((ocrResponse && ocrResponse.message) || 'OCR ??????')
-      }
+      wx.showLoading({ title: '识别中...' })
 
-      const result = await cloudApiService.runImportDraftOcr({
-        id,
-        ocrText: ocrResponse.text || (ocrResponse.data && ocrResponse.data.text) || '',
-        ocrDiagnostics: {
-          status: 'ok',
-          requestedCount: sourceImages.length,
-          recognizedCount: Number((ocrResponse.diagnostics && ocrResponse.diagnostics.recognizedCount) || 0),
-          emptyCount: Number((ocrResponse.diagnostics && ocrResponse.diagnostics.emptyCount) || 0),
-          failedCount: Number((ocrResponse.diagnostics && ocrResponse.diagnostics.failedCount) || 0),
-          results: Array.isArray(ocrResponse.data && ocrResponse.data.results) ? ocrResponse.data.results : []
+      let result = null
+      let containerError = null
+
+      try {
+        const ocrResponse = typeof cloudApiService.runOcrInContainer === 'function'
+          ? await cloudApiService.runOcrInContainer(sourceImages)
+          : await callContainerOcr(sourceImages)
+
+        if (!ocrResponse || !ocrResponse.success) {
+          throw new Error((ocrResponse && ocrResponse.message) || 'OCR 服务暂时不可用')
         }
-      })
+
+        result = await cloudApiService.runImportDraftOcr({
+          id,
+          ocrText: ocrResponse.text || (ocrResponse.data && ocrResponse.data.text) || '',
+          ocrDiagnostics: {
+            status: 'ok',
+            requestedCount: sourceImages.length,
+            recognizedCount: Number((ocrResponse.diagnostics && ocrResponse.diagnostics.recognizedCount) || 0),
+            emptyCount: Number((ocrResponse.diagnostics && ocrResponse.diagnostics.emptyCount) || 0),
+            failedCount: Number((ocrResponse.diagnostics && ocrResponse.diagnostics.failedCount) || 0),
+            results: Array.isArray(ocrResponse.data && ocrResponse.data.results) ? ocrResponse.data.results : []
+          }
+        })
+      } catch (error) {
+        containerError = error
+      }
+
+      if (!result || !result.success) {
+        result = await cloudApiService.runImportDraftOcr({ id })
+      }
+
       wx.hideLoading()
 
       if (!result.success) {
-        throw new Error(result.message || 'OCR ????')
+        throw new Error(result.message || (containerError && containerError.message) || 'OCR 处理失败')
       }
 
       wx.showToast({
-        title: result.message || 'OCR ???',
+        title: result.message || 'OCR 已完成',
         icon: 'none'
       })
 
@@ -342,7 +356,7 @@ Page({
     } catch (error) {
       wx.hideLoading()
       wx.showToast({
-        title: error.message || 'OCR ????',
+        title: error.message || 'OCR 处理失败',
         icon: 'none'
       })
     }

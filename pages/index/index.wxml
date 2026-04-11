@@ -1,7 +1,26 @@
 <view class="page-shell">
-  <view class="hero-card rise-enter">
+  <view class="hero-card weather-hero weather-{{weatherThemeClass}} rise-enter">
+    <view class="weather-backdrop">
+      <view class="weather-glow weather-glow-main"></view>
+      <view class="weather-glow weather-glow-secondary"></view>
+      <view class="weather-particles">
+        <view class="weather-dot"></view>
+        <view class="weather-dot"></view>
+        <view class="weather-dot"></view>
+      </view>
+    </view>
     <view class="hero-layout">
       <view class="hero-copy">
+        <view class="weather-badge-row">
+          <view class="weather-badge">
+            <text class="weather-badge-label">WEATHER</text>
+            <text class="weather-badge-value">{{weatherLabel}}</text>
+          </view>
+          <view class="weather-badge weather-badge-soft">
+            <text class="weather-badge-label">TEMP</text>
+            <text class="weather-badge-value">{{weatherTemperature}}</text>
+          </view>
+        </view>
         <view class="hero-eyebrow">
           <text>DINNER STUDIO</text>
           <text>{{currentDate}}</text>
@@ -22,13 +41,13 @@
       <view class="hero-side">
         <view class="hero-side-card">
           <text class="hero-side-label">CURATOR NOTE</text>
-          <text class="hero-side-value">NOW</text>
-          <text class="hero-side-meta">{{todayMood}}</text>
+          <text class="hero-side-value">{{weatherTemperature}}</text>
+          <text class="hero-side-meta">{{weatherSummary}}</text>
         </view>
-        <view class="hero-side-card">
-          <text class="hero-side-label">SERVICE</text>
-          <text class="hero-side-value">01</text>
-          <text class="hero-side-meta">从推荐、搭配到发送，一屏完成今晚菜单。</text>
+        <view class="hero-side-card weather-info-card">
+          <text class="hero-side-label">FEELS LIKE</text>
+          <text class="hero-side-value">{{weatherTemperature}}</text>
+          <text class="hero-side-meta">{{weatherDetail}}</text>
         </view>
       </view>
     </view>

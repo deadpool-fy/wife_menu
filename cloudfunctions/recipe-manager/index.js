@@ -1,4 +1,4 @@
-﻿const cloud = require('wx-server-sdk')
+const cloud = require('wx-server-sdk')
 const https = require('https')
 const http = require('http')
 
@@ -27,6 +27,8 @@ exports.main = async (event) => {
         return await getCategories()
       case 'getStats':
         return await getStats()
+      case 'getWeatherSnapshot':
+        return await getWeatherSnapshot(data)
       case 'createImportDraft':
         return await createImportDraft(data)
       case 'autoImportByUrl':
@@ -238,6 +240,47 @@ async function getStats() {
   }
 }
 
+async function getWeatherSnapshot(data) {
+  const latitude = Number(data.latitude)
+  const longitude = Number(data.longitude)
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    throw new Error('????????')
+  }
+
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + encodeURIComponent(latitude) + '&longitude=' + encodeURIComponent(longitude) + '&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m,precipitation&timezone=auto&forecast_days=1'
+  const responseText = await requestUrl(url, {
+    headers: {
+      accept: 'application/json'
+    },
+    timeout: 12000
+  })
+  const response = JSON.parse(responseText)
+  const current = response.current || {}
+  console.log('[weather-cloud] request', { latitude, longitude, url })
+  console.log('[weather-cloud] response.current', current)
+
+  const temperature = Number(current.temperature_2m)
+  const apparentTemperature = Number(current.apparent_temperature)
+  const weatherCode = Number(current.weather_code)
+  const isDay = Number(current.is_day) === 1
+  const windSpeed = Number(current.wind_speed_10m)
+  const precipitation = Number(current.precipitation)
+
+  return {
+    success: true,
+    data: {
+      temperature: Number.isFinite(temperature) ? temperature : null,
+      apparentTemperature: Number.isFinite(apparentTemperature) ? apparentTemperature : null,
+      weatherCode: Number.isFinite(weatherCode) ? weatherCode : 0,
+      isDay,
+      windSpeed: Number.isFinite(windSpeed) ? windSpeed : 0,
+      precipitation: Number.isFinite(precipitation) ? precipitation : 0,
+      fetchedAt: new Date().toISOString()
+    }
+  }
+}
+
 async function createImportDraft(data) {
   const sourcePlatform = (data.sourcePlatform || 'manual').trim() || 'manual'
   const sourceUrl = normalizeUrl(data.sourceUrl || '')
@@ -361,25 +404,26 @@ async function getImportDrafts(data) {
   }
 }
 
+
 async function runImportDraftOcr(data) {
   const { id } = data
   if (!id) {
-    throw new Error('?? ID ????')
+    throw new Error('草稿 ID 不能为空')
   }
 
   const draftResult = await db.collection('recipe_imports').doc(id).get()
   const draft = draftResult.data
   if (!draft) {
-    throw new Error('???????')
+    throw new Error('导入草稿不存在')
   }
 
   if (draft.status !== 'pending') {
-    throw new Error('?????????? OCR')
+    throw new Error('仅待审核草稿支持补跑 OCR')
   }
 
   const sourceImages = Array.isArray(draft.sourceImages) ? draft.sourceImages.filter(Boolean) : []
   if (!sourceImages.length) {
-    throw new Error('????????????')
+    throw new Error('当前草稿没有可识别的图片')
   }
 
   const hasProvidedOcr = typeof data.ocrText === 'string' || data.ocrDiagnostics
@@ -410,9 +454,9 @@ async function runImportDraftOcr(data) {
         title: parsedRecipe.title || draft.parsedRecipe?.title || '',
         description: parsedRecipe.description || draft.parsedRecipe?.description || '',
         image: parsedRecipe.image || draft.parsedRecipe?.image || sourceImages[0] || '',
-        category: parsedRecipe.category || draft.parsedRecipe?.category || '???',
-        difficulty: parsedRecipe.difficulty || draft.parsedRecipe?.difficulty || '??',
-        cookingTime: parsedRecipe.cookingTime || draft.parsedRecipe?.cookingTime || '30??',
+        category: parsedRecipe.category || draft.parsedRecipe?.category || '家常菜',
+        difficulty: parsedRecipe.difficulty || draft.parsedRecipe?.difficulty || '简单',
+        cookingTime: parsedRecipe.cookingTime || draft.parsedRecipe?.cookingTime || '30分钟',
         servings: parsedRecipe.servings || draft.parsedRecipe?.servings || 2,
         calories: parsedRecipe.calories || draft.parsedRecipe?.calories || 200,
         ingredients: normalizeIngredients(parsedRecipe.ingredients),
@@ -427,7 +471,7 @@ async function runImportDraftOcr(data) {
 
   return {
     success: true,
-    message: ocrText ? 'OCR ????????' : 'OCR ??????????????',
+    message: ocrText ? 'OCR 已完成并更新草稿' : 'OCR 已执行，但暂未识别出图片文字',
     data: {
       id,
       ocrText,

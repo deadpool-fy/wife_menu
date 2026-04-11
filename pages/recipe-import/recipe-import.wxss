@@ -23,12 +23,14 @@
 .field-input,
 .field-textarea {
   width: 100%;
-  padding: 22rpx 24rpx;
+  min-height: 100rpx;
+  padding: 26rpx 28rpx;
   border-radius: 24rpx;
   background: rgba(255, 255, 255, 0.56);
   box-sizing: border-box;
-  font-size: var(--font-sm);
+  font-size: var(--font-base);
   color: var(--text-primary);
+  line-height: 1.55;
 }
 
 .picker-value {
@@ -39,12 +41,12 @@
 }
 
 .large-textarea {
-  min-height: 320rpx;
+  min-height: 380rpx;
 }
 
 .submit-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16rpx;
   margin-top: 20rpx;
 }
@@ -59,9 +61,12 @@
 
 .action-pill,
 .mini-btn {
-  height: 72rpx;
-  padding: 0 24rpx;
-  font-size: var(--font-xs);
+  min-width: 128rpx;
+  height: 82rpx;
+  padding: 0 28rpx;
+  font-size: var(--font-sm);
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .draft-list {
@@ -138,12 +143,15 @@
   align-items: center;
   justify-content: center;
   gap: 10rpx;
-  height: 72rpx;
-  padding: 0 24rpx;
+  min-width: 128rpx;
+  height: 82rpx;
+  padding: 0 28rpx;
   border-radius: 999rpx;
   box-sizing: border-box;
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--text-inverse);
   background: linear-gradient(135deg, #d96b4d 0%, #bf5638 100%);
+  white-space: nowrap;
+  word-break: keep-all;
 }

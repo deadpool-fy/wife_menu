@@ -1,11 +1,11 @@
 <view class="page-shell">
   <view class="hero-card rise-enter">
     <view class="hero-eyebrow">
-      <text>CREATE RECIPE</text>
-      <text>后台录入</text>
+      <text>{{isEdit ? 'EDIT RECIPE' : 'CREATE RECIPE'}}</text>
+      <text>{{isEdit ? '后台编辑' : '后台录入'}}</text>
     </view>
-    <view class="hero-title">新增菜谱，也应该像在编辑一份正式内容。</view>
-    <view class="hero-subtitle">把录入步骤拆成更顺手的模块，避免表单又长又乱，最后谁都不想维护。</view>
+    <view class="hero-title">{{isEdit ? '把已有菜谱修得更完整，而不是放着继续失真。' : '新增菜谱，也应该像在编辑一份正式内容。'}}</view>
+    <view class="hero-subtitle">{{isEdit ? '支持直接修改封面、分类、食材和步骤，后台维护终于能闭环。' : '把录入步骤拆成更顺手的模块，避免表单又长又乱，最后谁都不想维护。'}}</view>
   </view>
 
   <view class="surface-card section-shell fade-enter">
@@ -37,7 +37,7 @@
             <text class="image-placeholder-desc">建议使用干净、明亮、主体明确的菜品图片。</text>
           </view>
           <view class="image-actions">
-            <view class="ghost-btn image-btn" bindtap="chooseImage">选择图片</view>
+            <view class="ghost-btn image-btn" bindtap="chooseImage">{{imageUploading ? '上传中...' : '选择图片'}}</view>
             <view class="ghost-btn image-btn" bindtap="removeImage" wx:if="{{formData.image}}">移除</view>
           </view>
         </view>
@@ -72,7 +72,22 @@
 
       <view class="field">
         <text class="field-label">热量估算</text>
-        <input class="field-input" type="number" placeholder="例如：380" value="{{formData.calories}}" bindinput="onCaloriesInput" />
+        <view class="calorie-panel">
+          <view class="calorie-head">
+            <text class="calorie-value">{{calorieEstimateLabel}}</text>
+            <text class="calorie-status">{{calorieStatusText}}</text>
+          </view>
+          <text class="calorie-hint">{{calorieHint}}</text>
+          <view class="calorie-breakdown" wx:if="{{calorieBreakdown.length}}">
+            <view class="calorie-item {{item.status}}" wx:for="{{calorieBreakdown}}" wx:key="index">
+              <view class="calorie-item-main">
+                <text class="calorie-item-name">{{item.name}}</text>
+                <text class="calorie-item-amount" wx:if="{{item.amount}}">{{item.amount}}</text>
+              </view>
+              <text class="calorie-item-label">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
   </view>
@@ -86,10 +101,27 @@
       <view class="ghost-btn action-pill" bindtap="addIngredient">新增食材</view>
     </view>
     <view class="editor-list">
-      <view class="inline-editor" wx:for="{{formData.ingredients}}" wx:key="index">
-        <input class="field-input flex-fill" placeholder="食材名称" value="{{item.name}}" bindinput="onIngredientNameInput" data-index="{{index}}" />
-        <input class="field-input amount-input" placeholder="份量" value="{{item.amount}}" bindinput="onIngredientAmountInput" data-index="{{index}}" />
-        <view class="inline-remove" bindtap="removeIngredient" data-index="{{index}}">×</view>
+      <view class="inline-editor" wx:for="{{formData.ingredients}}" wx:key="index" wx:for-index="ingredientIndex">
+        <input class="field-input flex-fill" placeholder="食材名称" value="{{item.name}}" bindinput="onIngredientNameInput" data-index="{{ingredientIndex}}" />
+        <input class="field-input quantity-input" type="digit" placeholder="数量" value="{{item.quantity}}" bindinput="onIngredientQuantityInput" data-index="{{ingredientIndex}}" />
+        <view class="unit-quick-list">
+          <view
+            class="unit-chip {{chip === item.unit ? 'active' : ''}}"
+            wx:for="{{item.unitSuggestions}}"
+            wx:for-item="chip"
+            wx:for-index="chipIndex"
+            wx:key="chip"
+            bindtap="onIngredientUnitQuickSelect"
+            data-index="{{ingredientIndex}}"
+            data-unit="{{chip}}"
+          >
+            {{chip}}
+          </view>
+          <picker class="unit-more-picker" range="{{unitOptions}}" value="{{item.unitIndex}}" bindchange="onIngredientUnitChange" data-index="{{ingredientIndex}}">
+            <view class="unit-chip more">更多</view>
+          </picker>
+        </view>
+        <view class="inline-remove" bindtap="removeIngredient" data-index="{{ingredientIndex}}">×</view>
       </view>
     </view>
   </view>
@@ -144,11 +176,11 @@
   <view class="bottom-dock rise-enter">
     <view class="dock-content">
       <view class="dock-copy">
-        <text class="dock-title">录入完成后可直接提交</text>
+        <text class="dock-title">{{isEdit ? '修改完成后可直接更新' : '录入完成后可直接提交'}}</text>
         <text class="dock-desc">至少填写名称、简介、分类、一个食材和一个步骤。</text>
       </view>
-      <button class="primary-btn dock-action" bindtap="submitRecipe" disabled="{{isSubmitting}}">
-        {{isSubmitting ? '提交中...' : '保存菜谱'}}
+      <button class="primary-btn dock-action" bindtap="submitRecipe" disabled="{{isSubmitting || loadingRecipe || imageUploading}}">
+        {{isSubmitting ? (isEdit ? '更新中...' : '提交中...') : (imageUploading ? '图片上传中...' : (isEdit ? '更新菜谱' : '保存菜谱'))}}
       </button>
     </view>
   </view>

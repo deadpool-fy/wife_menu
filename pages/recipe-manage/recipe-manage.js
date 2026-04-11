@@ -136,11 +136,10 @@ Page({
     })
   },
 
-  editRecipe() {
-    wx.showToast({
-      title: '编辑页暂未开放，我可以下一步继续补上',
-      icon: 'none',
-      duration: 2200
+  editRecipe(e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({
+      url: '/pages/recipe-add/recipe-add?id=' + id
     })
   },
 

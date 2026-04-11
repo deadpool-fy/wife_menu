@@ -1,9 +1,12 @@
 .action-pill,
 .image-btn,
 .tag-add {
-  height: 72rpx;
-  padding: 0 24rpx;
-  font-size: var(--font-xs);
+  min-width: 128rpx;
+  height: 82rpx;
+  padding: 0 28rpx;
+  font-size: var(--font-sm);
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .form-stack {
@@ -27,17 +30,106 @@
 .field-textarea,
 .picker-box {
   width: 100%;
-  padding: 22rpx 24rpx;
+  min-height: 100rpx;
+  padding: 26rpx 28rpx;
   border-radius: 24rpx;
   background: rgba(255, 255, 255, 0.44);
   border: 1rpx solid rgba(124, 61, 35, 0.06);
   box-sizing: border-box;
-  font-size: var(--font-sm);
+  font-size: var(--font-base);
   color: var(--text-primary);
+  line-height: 1.55;
 }
 
 .field-textarea {
-  min-height: 170rpx;
+  min-height: 220rpx;
+}
+
+.calorie-panel {
+  width: 100%;
+  min-height: 116rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, rgba(255, 247, 239, 0.98) 0%, rgba(255, 241, 228, 0.92) 100%);
+  border: 1rpx solid rgba(124, 61, 35, 0.08);
+  box-sizing: border-box;
+}
+
+.calorie-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.calorie-value {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.calorie-status {
+  flex-shrink: 0;
+  padding: 10rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(214, 108, 61, 0.12);
+  color: #b55a35;
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+.calorie-hint {
+  display: block;
+  margin-top: 10rpx;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.calorie-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.calorie-item {
+  padding: 18rpx 20rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid rgba(124, 61, 35, 0.06);
+}
+
+.calorie-item.partial {
+  background: rgba(255, 250, 244, 0.92);
+}
+
+.calorie-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.calorie-item-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.calorie-item-amount {
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+}
+
+.calorie-item-label {
+  display: block;
+  margin-top: 8rpx;
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .image-panel {
@@ -62,7 +154,7 @@
   background: rgba(246, 241, 232, 0.92);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   text-align: center;
   padding: 40rpx;
@@ -84,6 +176,8 @@
 
 .image-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 12rpx;
   margin-top: 18rpx;
 }
@@ -112,16 +206,59 @@
 .inline-editor,
 .step-editor {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 14rpx;
+}
+
+.editor-list .inline-editor {
+  flex-wrap: wrap;
 }
 
 .flex-fill {
   flex: 1;
+  min-width: 0;
 }
 
-.amount-input {
-  width: 180rpx;
+.quantity-input {
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.quantity-input {
+  flex-shrink: 0;
+}
+
+.unit-quick-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  width: calc(100% - 72rpx);
+}
+
+.unit-chip {
+  min-width: 86rpx;
+  height: 72rpx;
+  padding: 0 20rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid rgba(124, 61, 35, 0.08);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 72rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.unit-chip.active {
+  background: linear-gradient(135deg, #db673a 0%, #c24f27 100%);
+  border-color: transparent;
+  color: #fffaf6;
+  font-weight: 700;
+}
+
+.unit-chip.more {
+  background: rgba(214, 108, 61, 0.08);
+  color: #b55a35;
 }
 
 .inline-remove {
@@ -134,6 +271,7 @@
   line-height: 58rpx;
   font-size: 34rpx;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .step-badge {
@@ -151,7 +289,7 @@
 
 .step-textarea {
   flex: 1;
-  min-height: 140rpx;
+  min-height: 180rpx;
 }
 
 .tag-box {

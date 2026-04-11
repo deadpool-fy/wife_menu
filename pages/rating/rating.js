@@ -7,25 +7,45 @@ Page({
     canSubmit: false,
     completedRatings: 0,
     totalDishes: 0,
-    ratingProgress: 0
+    ratingProgress: 0,
+    sharePanelVisible: false,
+    shareTitle: '',
+    shareSummary: '',
+    sharePath: '/pages/index/index'
   },
 
   onLoad() {
     this.loadSelectedDishes()
   },
 
-  loadSelectedDishes() {
-    const dishesWithRating = app.getSelectedDishes().map((dish) => ({
-      ...dish,
-      rating: 0,
-      comment: ''
-    }))
+  onShow() {
+    this.loadSelectedDishes()
+  },
 
-    this.setData({
-      selectedDishes: dishesWithRating
+  loadSelectedDishes() {
+    const storedRatings = wx.getStorageSync('menuRatings') || {}
+    const dishesWithRating = app.getSelectedDishes().map((dish) => {
+      const cached = storedRatings[dish.id] || {}
+      return {
+        ...dish,
+        rating: Number(cached.rating || dish.rating || 0),
+        comment: String(cached.comment || dish.comment || '')
+      }
     })
 
+    this.setData({ selectedDishes: dishesWithRating })
     this.syncProgress()
+  },
+
+  persistRatings() {
+    const payload = {}
+    this.data.selectedDishes.forEach((dish) => {
+      payload[dish.id] = {
+        rating: dish.rating || 0,
+        comment: dish.comment || ''
+      }
+    })
+    wx.setStorageSync('menuRatings', payload)
   },
 
   setRating(e) {
@@ -33,10 +53,11 @@ Page({
 
     this.setData({
       selectedDishes: this.data.selectedDishes.map((dish) => (
-        dish.id === dishId ? { ...dish, rating } : dish
+        dish.id === dishId ? { ...dish, rating: Number(rating) } : dish
       ))
     })
 
+    this.persistRatings()
     this.syncProgress()
   },
 
@@ -50,6 +71,7 @@ Page({
       ))
     })
 
+    this.persistRatings()
     this.syncProgress()
   },
 
@@ -108,6 +130,7 @@ Page({
           return
         }
 
+        wx.removeStorageSync('menuRatings')
         wx.showToast({
           title: '评价发送成功',
           icon: 'success'
@@ -130,7 +153,7 @@ Page({
       })
   },
 
-  copyRatingToClipboard(ratings) {
+  buildRatingText(ratings) {
     let content = '今天的菜单评价：\n\n'
 
     ratings.forEach((dish, index) => {
@@ -145,9 +168,15 @@ Page({
     })
 
     content += `评价时间：${this.getCurrentTime()}`
+    return content
+  },
+
+  copyRatingToClipboard(ratings) {
+    const content = this.buildRatingText(ratings)
 
     messageService.copyToClipboard(content)
       .then(() => {
+        wx.removeStorageSync('menuRatings')
         app.clearSelectedDishes()
         setTimeout(() => {
           wx.switchTab({
@@ -164,37 +193,29 @@ Page({
   },
 
   shareRatingToFriend(ratings) {
-    let content = '今天的菜单评价：\n\n'
+    this.setData({
+      sharePanelVisible: true,
+      shareTitle: '今晚菜单反馈已整理好',
+      shareSummary: this.buildShareSummary(ratings),
+      sharePath: '/pages/rating/rating'
+    })
+  },
 
-    ratings.forEach((dish, index) => {
-      content += `${index + 1}. ${dish.name}\n`
+  buildShareSummary(ratings) {
+    return ratings.map((dish) => {
+      const pieces = [dish.name]
       if (dish.rating > 0) {
-        content += `评分：${dish.rating} 分\n`
+        pieces.push(dish.rating + ' 分')
       }
       if (dish.comment.trim()) {
-        content += `评价：${dish.comment}\n`
+        pieces.push(dish.comment.trim())
       }
-      content += '\n'
-    })
+      return pieces.join(' · ')
+    }).join('\n')
+  },
 
-    content += `评价时间：${this.getCurrentTime()}`
-
-    wx.setClipboardData({
-      data: content,
-      success: () => {
-        wx.showModal({
-          title: '评价已复制',
-          content: '可以把这份菜单反馈直接发送给家人或朋友。',
-          showCancel: false
-        })
-      },
-      fail: () => {
-        wx.showToast({
-          title: '复制失败',
-          icon: 'none'
-        })
-      }
-    })
+  closeSharePanel() {
+    this.setData({ sharePanelVisible: false })
   },
 
   skipRating() {
@@ -206,6 +227,7 @@ Page({
           return
         }
 
+        wx.removeStorageSync('menuRatings')
         app.clearSelectedDishes()
         wx.switchTab({
           url: '/pages/index/index'
@@ -223,5 +245,12 @@ Page({
     const minute = now.getMinutes().toString().padStart(2, '0')
 
     return `${year}年${month}月${day}日 ${hour}:${minute}`
+  },
+
+  onShareAppMessage() {
+    return {
+      title: this.data.shareTitle || '今晚菜单反馈已整理好',
+      path: this.data.sharePath || '/pages/rating/rating'
+    }
   }
 })

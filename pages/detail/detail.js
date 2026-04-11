@@ -10,7 +10,11 @@ Page({
     },
     isSelected: false,
     loading: false,
-    error: null
+    error: null,
+    sharePanelVisible: false,
+    shareTitle: '',
+    sharePath: '',
+    shareSummary: ''
   },
 
   onLoad(options) {
@@ -179,27 +183,21 @@ Page({
   },
 
   shareDishToFriend(dish) {
-    let content = `推荐一道今晚很适合安排的 ${dish.name}\n\n`
-    content += `难度：${dish.difficulty}\n`
-    content += `时间：${dish.cookingTime}\n`
-    content += `人数：${dish.servings} 人\n`
-
-    wx.setClipboardData({
-      data: content,
-      success: () => {
-        wx.showModal({
-          title: '菜品信息已复制',
-          content: '可以直接把这道菜推荐给家人或朋友。',
-          showCancel: false
-        })
-      },
-      fail: () => {
-        wx.showToast({
-          title: '复制失败',
-          icon: 'none'
-        })
-      }
+    const summary = this.buildShareSummary(dish)
+    this.setData({
+      sharePanelVisible: true,
+      shareTitle: '推荐一道很适合今晚安排的 ' + dish.name,
+      sharePath: '/pages/detail/detail?id=' + dish.id,
+      shareSummary: summary
     })
+  },
+
+  buildShareSummary(dish) {
+    return [dish.name, dish.difficulty, dish.cookingTime, dish.servings + ' 人份'].filter(Boolean).join(' · ')
+  },
+
+  closeSharePanel() {
+    this.setData({ sharePanelVisible: false })
   },
 
   goBack() {
@@ -209,8 +207,8 @@ Page({
   onShareAppMessage() {
     const dish = this.data.dishDetail
     return {
-      title: `推荐一道很适合今晚安排的 ${dish.name}`,
-      path: `/pages/detail/detail?id=${dish.id}`
+      title: this.data.shareTitle || ('推荐一道很适合今晚安排的 ' + dish.name),
+      path: this.data.sharePath || ('/pages/detail/detail?id=' + dish.id)
     }
   }
 })

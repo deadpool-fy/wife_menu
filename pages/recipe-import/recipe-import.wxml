@@ -101,11 +101,12 @@
         <text class="draft-ocr" wx:if="{{item.ocrPreview}}">{{item.ocrPreview}}</text>
         <text class="draft-ocr draft-ocr-diagnostics" wx:if="{{item.ocrDiagnosticsLabel}}">{{item.ocrDiagnosticsLabel}}</text>
         <view class="draft-actions">
-          <view class="ghost-btn mini-btn" wx:if="{{item.sourceImages && item.sourceImages.length}}" bindtap="runDraftOcr" data-id="{{item._id}}">?? OCR</view>
-          <view class="ghost-btn mini-btn" bindtap="copyDraftText" data-text="{{item.originalText}}">????</view>
-          <view class="danger-btn mini-btn" bindtap="rejectDraft" data-id="{{item._id}}">??</view>
-          <view class="primary-btn mini-btn" bindtap="approveDraft" data-id="{{item._id}}">?????</view>
-        </view>      </view>
+          <view class="ghost-btn mini-btn" wx:if="{{item.sourceImages && item.sourceImages.length}}" bindtap="runDraftOcr" data-id="{{item._id}}">补跑 OCR</view>
+          <view class="ghost-btn mini-btn" bindtap="copyDraftText" data-text="{{item.originalText}}">复制原文</view>
+          <view class="danger-btn mini-btn" bindtap="rejectDraft" data-id="{{item._id}}">驳回</view>
+          <view class="primary-btn mini-btn" bindtap="approveDraft" data-id="{{item._id}}">通过入库</view>
+        </view>
+      </view>
     </view>
 
     <view class="empty-panel" wx:else>

@@ -5,7 +5,7 @@
       <text>{{completedRatings}} / {{totalDishes}} 已完成</text>
     </view>
     <view class="hero-title">把这顿饭的反馈留下来，下次菜单会更懂你。</view>
-    <view class="hero-subtitle">你不需要写很长，只要简单标记口味、份量或惊喜程度，就能让之后的推荐更像“专门为你选的”。</view>
+    <view class="hero-subtitle">一张卡只评价一道菜，先打分，再补一句感受，整页会清楚很多。</view>
     <view class="progress-card">
       <view class="progress-copy">
         <text class="progress-label">评价进度</text>
@@ -13,6 +13,29 @@
       </view>
       <view class="progress-track">
         <view class="progress-fill" style="width: {{ratingProgress}}%;"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell rating-summary fade-enter" wx:if="{{selectedDishes.length > 0}}">
+    <view class="section-head compact-head">
+      <view class="section-title-wrap">
+        <text class="section-kicker">QUICK GUIDE</text>
+        <text class="section-title">怎么填更省事</text>
+      </view>
+    </view>
+    <view class="summary-grid">
+      <view class="summary-item">
+        <text class="summary-value">1</text>
+        <text class="summary-label">先点星级</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-value">2</text>
+        <text class="summary-label">再补一句感受</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-value">{{completedRatings}}</text>
+        <text class="summary-label">已完成反馈</text>
       </view>
     </view>
   </view>
@@ -35,19 +58,22 @@
       </view>
 
       <view class="editor-block">
-        <text class="editor-title">这道菜值几分？</text>
+        <text class="editor-title">这道菜整体怎么样？</text>
+        <text class="editor-helper strong-helper">1 分一般，5 分是下次还想再吃。</text>
         <view class="star-row">
-          <view class="star {{index < item.rating ? 'active' : ''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this" bindtap="setRating" data-dish-id="{{item.id}}" data-rating="{{index + 1}}">★</view>
+          <view class="star {{index < item.rating ? 'active' : ''}}" wx:for="{{[1,2,3,4,5]}}" wx:key="*this" bindtap="setRating" data-dish-id="{{item.id}}" data-rating="{{index + 1}}">
+            <text>★</text>
+          </view>
         </view>
-        <text class="editor-helper">{{item.rating > 0 ? '已打 ' + item.rating + ' 分' : '轻点星星快速打分'}}</text>
+        <text class="editor-helper">{{item.rating > 0 ? '已打 ' + item.rating + ' 分' : '点一下星星就能完成打分'}}</text>
       </view>
 
       <view class="editor-block">
         <view class="comment-head">
-          <text class="editor-title">补充一点感受</text>
+          <text class="editor-title">补一句具体感受</text>
           <text class="comment-count">{{item.comment ? item.comment.length : 0}} / 200</text>
         </view>
-        <textarea class="comment-box" placeholder="比如：汤很鲜、下次想少一点辣、份量刚刚好……" value="{{item.comment}}" bindinput="onCommentInput" data-dish-id="{{item.id}}" maxlength="200"></textarea>
+        <textarea class="comment-box" placeholder="比如：味道很稳、下次想少一点辣、份量刚刚好。" value="{{item.comment}}" bindinput="onCommentInput" data-dish-id="{{item.id}}" maxlength="200"></textarea>
       </view>
     </view>
   </view>
@@ -57,14 +83,32 @@
     <text class="empty-desc">回到首页先选几道菜，评价页就会自动出现对应内容。</text>
   </view>
 
-  <view class="bottom-dock rise-enter">
-    <view class="dock-content rating-dock">
-      <view class="dock-copy">
+  <view class="bottom-dock rise-enter" wx:if="{{!sharePanelVisible}}">
+    <view class="dock-content rating-dock-panel">
+      <view class="dock-copy rating-dock-copy">
         <text class="dock-title">已完成 {{completedRatings}} / {{totalDishes}} 道反馈</text>
         <text class="dock-desc">至少评价一道菜就可以提交，也可以直接跳过本轮反馈。</text>
       </view>
-      <button class="ghost-btn rating-skip" bindtap="skipRating">跳过</button>
-      <button class="primary-btn rating-submit" bindtap="submitRating" disabled="{{!canSubmit}}">提交评价</button>
+      <view class="rating-dock-actions">
+        <button class="ghost-btn rating-skip" bindtap="skipRating">先跳过</button>
+        <button class="primary-btn rating-submit" bindtap="submitRating" disabled="{{!canSubmit}}">提交评价</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="share-panel-mask" wx:if="{{sharePanelVisible}}" bindtap="closeSharePanel"></view>
+  <view class="share-panel rise-enter" wx:if="{{sharePanelVisible}}">
+    <view class="share-panel-head">
+      <text class="share-panel-title">分享给朋友</text>
+      <text class="share-panel-desc">这里会直接拉起微信原生分享面板，不再只是复制到剪贴板。</text>
+    </view>
+    <view class="share-panel-body">
+      <text class="share-panel-label">本次反馈</text>
+      <text class="share-panel-summary">{{shareSummary}}</text>
+    </view>
+    <view class="share-panel-actions">
+      <button class="ghost-btn share-secondary" bindtap="closeSharePanel">先不分享</button>
+      <button class="primary-btn share-primary" open-type="share">立即分享</button>
     </view>
   </view>
 </view>

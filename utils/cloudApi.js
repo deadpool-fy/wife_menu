@@ -53,6 +53,10 @@ class CloudApiService {
     return await this.callCloudFunction('recipe-manager', 'getStats');
   }
 
+  async getWeatherSnapshot(payload) {
+    return await this.callCloudFunction('recipe-manager', 'getWeatherSnapshot', payload);
+  }
+
   async createImportDraft(payload) {
     return await this.callCloudFunction('recipe-manager', 'createImportDraft', payload);
   }

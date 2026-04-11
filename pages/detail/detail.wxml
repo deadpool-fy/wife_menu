@@ -107,12 +107,29 @@
     </view>
   </view>
 
-  <view class="bottom-dock rise-enter">
+  <view class="bottom-dock rise-enter" wx:if="{{!sharePanelVisible}}">
     <view class="dock-content detail-dock">
       <button class="ghost-btn detail-back" bindtap="goBack">返回</button>
       <button class="primary-btn detail-main" bindtap="addToMenu" wx:if="{{!isSelected}}">加入菜单</button>
       <button class="tonal-btn detail-main selected-btn" bindtap="removeFromMenu" wx:else>已加入，点此移除</button>
       <button class="ghost-btn detail-share" bindtap="shareDish">分享</button>
     </view>
+  </view>
+</view>
+
+
+<view class="share-panel-mask" wx:if="{{sharePanelVisible}}" bindtap="closeSharePanel"></view>
+<view class="share-panel rise-enter" wx:if="{{sharePanelVisible}}">
+  <view class="share-panel-head">
+    <text class="share-panel-title">分享给朋友</text>
+    <text class="share-panel-desc">这里会直接拉起微信原生分享面板，不再只是复制到剪贴板。</text>
+  </view>
+  <view class="share-panel-body">
+    <text class="share-panel-label">本次推荐</text>
+    <text class="share-panel-summary">{{shareSummary}}</text>
+  </view>
+  <view class="share-panel-actions">
+    <button class="ghost-btn share-secondary" bindtap="closeSharePanel">先不分享</button>
+    <button class="primary-btn share-primary" open-type="share">立即分享</button>
   </view>
 </view>

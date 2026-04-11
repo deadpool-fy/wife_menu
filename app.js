@@ -1,4 +1,4 @@
-﻿const secureConfig = require('./config/secureConfig.js')
+const secureConfig = require('./config/secureConfig.js')
 
 App({
   onLaunch() {
@@ -16,6 +16,7 @@ App({
       wx.cloud.init(cloudOptions)
     }
 
+    this.initLocalData()
     this.getUserInfo()
   },
 
