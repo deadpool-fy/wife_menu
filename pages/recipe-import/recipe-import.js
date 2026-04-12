@@ -1,5 +1,6 @@
 const cloudApiService = require('../../utils/cloudApi.js')
 const secureConfig = require('../../config/secureConfig.js')
+const app = getApp()
 
 function cleanImportedTitle(title) {
   const normalized = String(title || '').replace(/\s+/g, ' ').trim()
@@ -115,8 +116,31 @@ Page({
     autoImporting: false
   },
 
-  onLoad() {
+  async onLoad() {
+    const allowed = await this.ensureAdminAccess()
+    if (!allowed) {
+      return
+    }
     this.loadDrafts()
+  },
+
+  async ensureAdminAccess() {
+    const result = await app.ensureAdminStatus(true)
+    if (result.isAdmin) {
+      return true
+    }
+
+    wx.showModal({
+      title: '?????',
+      content: '??????????????????????',
+      showCancel: false,
+      success: () => {
+        wx.switchTab({
+          url: '/pages/index/index'
+        })
+      }
+    })
+    return false
   },
 
   onShow() {

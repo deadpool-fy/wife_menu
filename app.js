@@ -1,4 +1,5 @@
 const secureConfig = require('./config/secureConfig.js')
+const cloudApiService = require('./utils/cloudApi.js')
 
 App({
   onLaunch() {
@@ -18,6 +19,7 @@ App({
 
     this.initLocalData()
     this.getUserInfo()
+    this.ensureAdminStatus()
   },
 
   getUserInfo() {
@@ -41,7 +43,37 @@ App({
     userInfo: null,
     selectedDishes: [],
     userFavorites: [],
-    userRatings: []
+    userRatings: [],
+    isAdmin: false,
+    adminOpenId: ''
+  },
+
+  async ensureAdminStatus(forceRefresh = false) {
+    if (!forceRefresh && typeof this.globalData.isAdmin === 'boolean' && this.globalData.adminOpenId) {
+      return {
+        isAdmin: this.globalData.isAdmin,
+        openId: this.globalData.adminOpenId
+      }
+    }
+
+    try {
+      const result = await cloudApiService.getAdminAccess()
+      const data = (result && result.success && result.data) ? result.data : {}
+      this.globalData.isAdmin = !!data.isAdmin
+      this.globalData.adminOpenId = data.openId || ''
+      return {
+        isAdmin: this.globalData.isAdmin,
+        openId: this.globalData.adminOpenId
+      }
+    } catch (error) {
+      console.error('获取管理员状态失败:', error)
+      this.globalData.isAdmin = false
+      this.globalData.adminOpenId = ''
+      return {
+        isAdmin: false,
+        openId: ''
+      }
+    }
   },
 
   getSelectedDishes() {

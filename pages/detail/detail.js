@@ -1,6 +1,7 @@
 const app = getApp()
 const messageService = require('../../utils/messageService.js')
 const cloudApiService = require('../../utils/cloudApi.js')
+const { decorateRecipeImage } = require('../../utils/recipeImage.js')
 
 Page({
   data: {
@@ -32,17 +33,17 @@ Page({
 
     try {
       const response = await cloudApiService.getRecipeById(dishId)
-
       if (!(response.success && response.data)) {
         throw new Error(response.message || '菜品不存在')
       }
 
       const recipe = response.data
-      const dishDetail = {
+      const dishDetail = decorateRecipeImage({
         id: recipe._id,
         name: recipe.title,
         description: recipe.description || '这道菜目前还没有补充介绍，但从配料和步骤来看已经很适合今晚安排。',
-        image: recipe.image || '/images/default-dish.png',
+        image: recipe.image || '',
+        importSource: recipe.importSource || '',
         category: recipe.category || '家常菜',
         difficulty: recipe.difficulty || '简单',
         cookingTime: recipe.cookingTime || '30分钟',
@@ -57,7 +58,7 @@ Page({
         author: recipe.author || '',
         sourceUrl: recipe.sourceUrl || '',
         tags: recipe.tags || []
-      }
+      })
 
       this.setData({
         dishDetail,
@@ -67,31 +68,9 @@ Page({
       this.checkSelectedStatus()
     } catch (error) {
       console.error('加载菜品详情失败:', error)
-
-      const { getDishDetail } = require('../../data/dishes.js')
-      const fallbackDetail = getDishDetail(parseInt(dishId, 10))
-
-      if (!fallbackDetail) {
-        this.setData({
-          loading: false,
-          error: '菜品不存在'
-        })
-
-        wx.showToast({
-          title: '菜品不存在',
-          icon: 'none'
-        })
-
-        setTimeout(() => {
-          wx.navigateBack()
-        }, 1000)
-        return
-      }
-
       this.setData({
-        dishDetail: fallbackDetail,
         loading: false,
-        error: '网络连接失败，已切换到本地菜谱'
+        error: error.message || '菜品详情加载失败'
       })
     }
   },
@@ -106,7 +85,6 @@ Page({
   addToMenu() {
     app.addSelectedDish(this.data.dishDetail)
     this.setData({ isSelected: true })
-
     wx.showToast({
       title: '已加入菜单',
       icon: 'success'
@@ -116,7 +94,6 @@ Page({
   removeFromMenu() {
     app.removeSelectedDish(this.data.dishDetail.id)
     this.setData({ isSelected: false })
-
     wx.showToast({
       title: '已移出菜单',
       icon: 'success'
@@ -140,7 +117,6 @@ Page({
 
   sendWeChatDishMessage(dish) {
     wx.showLoading({ title: '发送中...' })
-
     messageService.sendDishMessage(dish)
       .then((result) => {
         wx.hideLoading()
@@ -159,10 +135,10 @@ Page({
   },
 
   copyDishToClipboard(dish) {
-    let content = `推荐一道今晚很适合安排的 ${dish.name}\n\n`
+    let content = `推荐一道今晚很适合安排的：${dish.name}\n\n`
     content += `难度：${dish.difficulty}\n`
     content += `时间：${dish.cookingTime}\n`
-    content += `人数：${dish.servings} 人\n\n`
+    content += `人数：${dish.servings} 人份\n\n`
     content += '主要食材：\n'
 
     dish.ingredients.slice(0, 5).forEach((ingredient) => {
@@ -186,14 +162,14 @@ Page({
     const summary = this.buildShareSummary(dish)
     this.setData({
       sharePanelVisible: true,
-      shareTitle: '推荐一道很适合今晚安排的 ' + dish.name,
-      sharePath: '/pages/detail/detail?id=' + dish.id,
+      shareTitle: `推荐一道很适合今晚安排的：${dish.name}`,
+      sharePath: `/pages/detail/detail?id=${dish.id}`,
       shareSummary: summary
     })
   },
 
   buildShareSummary(dish) {
-    return [dish.name, dish.difficulty, dish.cookingTime, dish.servings + ' 人份'].filter(Boolean).join(' · ')
+    return [dish.name, dish.difficulty, dish.cookingTime, `${dish.servings} 人份`].filter(Boolean).join(' · ')
   },
 
   closeSharePanel() {
@@ -207,8 +183,8 @@ Page({
   onShareAppMessage() {
     const dish = this.data.dishDetail
     return {
-      title: this.data.shareTitle || ('推荐一道很适合今晚安排的 ' + dish.name),
-      path: this.data.sharePath || ('/pages/detail/detail?id=' + dish.id)
+      title: this.data.shareTitle || `推荐一道很适合今晚安排的：${dish.name}`,
+      path: this.data.sharePath || `/pages/detail/detail?id=${dish.id}`
     }
   }
 })

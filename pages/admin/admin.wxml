@@ -81,6 +81,21 @@
         <text class="console-title">初始化数据</text>
         <text class="console-desc">快速恢复一套可演示、可联调的基础数据环境。</text>
       </view>
+      <view class="console-card neutral-card" bindtap="seedPresetRecipes">
+        <text class="console-tag">PRESET</text>
+        <text class="console-title">导入 100 条预设菜谱</text>
+        <text class="console-desc">一次性补齐基础内容库，重复执行会自动跳过同名菜谱。</text>
+      </view>
+      <view class="console-card neutral-card" bindtap="repairPresetRecipeImages">
+        <text class="console-tag">REPAIR</text>
+        <text class="console-title">修复菜谱封面</text>
+        <text class="console-desc">将缺失封面或旧随机图统一更换为更协调的菜名封面。</text>
+      </view>
+      <view class="console-card neutral-card" bindtap="enrichRecipeImages">
+        <text class="console-tag">PHOTO</text>
+        <text class="console-title">补全真实菜图</text>
+        <text class="console-desc">按菜名检索真实图片，分批为预设菜谱补齐更接近实物的封面。</text>
+      </view>
     </view>
   </view>
 

@@ -1,6 +1,7 @@
 const cloud = require('wx-server-sdk')
 const https = require('https')
 const http = require('http')
+const PRESET_RECIPES = require('./preset-recipes')
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
@@ -13,11 +14,16 @@ exports.main = async (event) => {
 
   try {
     switch (action) {
+      case 'getAdminAccess':
+        return await getAdminAccess()
       case 'addRecipe':
+        await assertAdminAccess()
         return await addRecipe(data)
       case 'updateRecipe':
+        await assertAdminAccess()
         return await updateRecipe(data)
       case 'deleteRecipe':
+        await assertAdminAccess()
         return await deleteRecipe(data)
       case 'getRecipes':
         return await getRecipes(data)
@@ -26,20 +32,45 @@ exports.main = async (event) => {
       case 'getCategories':
         return await getCategories()
       case 'getStats':
+        await assertAdminAccess()
         return await getStats()
       case 'getWeatherSnapshot':
         return await getWeatherSnapshot(data)
       case 'createImportDraft':
+        await assertAdminAccess()
         return await createImportDraft(data)
+      case 'seedPresetRecipes':
+        await assertAdminAccess()
+        return await seedPresetRecipes(data)
+      case 'clearRecipesData':
+        await assertAdminAccess()
+        return await clearRecipesData()
+      case 'clearAllAppData':
+        await assertAdminAccess()
+        return await clearAllAppData()
+      case 'clearCategoriesData':
+        await assertAdminAccess()
+        return await clearCategoriesData()
+      case 'repairPresetRecipeImages':
+        await assertAdminAccess()
+        return await repairPresetRecipeImages(data)
+      case 'enrichRecipeImages':
+        await assertAdminAccess()
+        return await enrichRecipeImages(data)
       case 'autoImportByUrl':
+        await assertAdminAccess()
         return await autoImportByUrl(data)
       case 'getImportDrafts':
+        await assertAdminAccess()
         return await getImportDrafts(data)
       case 'runImportDraftOcr':
+        await assertAdminAccess()
         return await runImportDraftOcr(data)
       case 'approveImportDraft':
+        await assertAdminAccess()
         return await approveImportDraft(data)
       case 'rejectImportDraft':
+        await assertAdminAccess()
         return await rejectImportDraft(data)
       default:
         return {
@@ -53,6 +84,45 @@ exports.main = async (event) => {
       success: false,
       message: error.message || '服务异常',
       error: error.message || String(error)
+    }
+  }
+}
+
+function normalizeAdminOpenIds(rawValue) {
+  if (!rawValue) {
+    return []
+  }
+
+  return String(rawValue)
+    .split(/[\n,;|]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function getCurrentOpenId() {
+  const wxContext = cloud.getWXContext()
+  return String(wxContext.OPENID || '').trim()
+}
+
+function isCurrentUserAdmin() {
+  const openId = getCurrentOpenId()
+  const adminOpenIds = normalizeAdminOpenIds(process.env.ADMIN_OPENIDS)
+  return !!openId && adminOpenIds.includes(openId)
+}
+
+async function assertAdminAccess() {
+  if (!isCurrentUserAdmin()) {
+    throw new Error('当前账号没有后台权限')
+  }
+}
+
+async function getAdminAccess() {
+  const openId = getCurrentOpenId()
+  return {
+    success: true,
+    data: {
+      isAdmin: isCurrentUserAdmin(),
+      openId
     }
   }
 }
@@ -321,6 +391,200 @@ async function createImportDraft(data) {
   }
 }
 
+async function seedPresetRecipes(data) {
+  const limit = Math.max(1, Math.min(Number(data.limit) || PRESET_RECIPES.length, PRESET_RECIPES.length))
+  const recipes = PRESET_RECIPES.slice(0, limit)
+  const titleSet = new Set(recipes.map((item) => String(item.title || '').trim()).filter(Boolean))
+  const existingResult = await db.collection('recipes').where({
+    title: db.command.in(Array.from(titleSet))
+  }).get().catch(() => ({ data: [] }))
+  const existingTitles = new Set((existingResult.data || []).map((item) => String(item.title || '').trim()))
+
+  const insertedTitles = []
+  const skippedTitles = []
+
+  for (const recipe of recipes) {
+    const title = String(recipe.title || '').trim()
+    if (!title || existingTitles.has(title)) {
+      skippedTitles.push(title)
+      continue
+    }
+
+    const record = buildRecipeRecord({
+      ...recipe,
+      author: recipe.author || '系统预设',
+      importSource: recipe.importSource || 'preset-batch'
+    })
+
+    await db.collection('recipes').add({ data: record })
+    insertedTitles.push(title)
+    existingTitles.add(title)
+  }
+
+  return {
+    success: true,
+    message: insertedTitles.length ? `已导入 ${insertedTitles.length} 条预设菜谱` : '当前预设菜谱都已存在，未重复导入',
+    data: {
+      requested: recipes.length,
+      inserted: insertedTitles.length,
+      skipped: skippedTitles.filter(Boolean).length,
+      insertedTitles,
+      skippedTitles: skippedTitles.filter(Boolean)
+    }
+  }
+}
+
+async function clearRecipesData() {
+  const removed = await clearCollectionRecords('recipes')
+  return {
+    success: true,
+    message: `已清空 recipes 集合，共删除 ${removed} 条记录`,
+    data: {
+      collections: {
+        recipes: removed
+      },
+      removed
+    }
+  }
+}
+
+async function clearCategoriesData() {
+  const removed = await clearCollectionRecords('categories')
+  return {
+    success: true,
+    message: `已清空 categories 集合，共删除 ${removed} 条记录`,
+    data: {
+      collections: {
+        categories: removed
+      },
+      removed
+    }
+  }
+}
+
+async function clearAllAppData() {
+  const collections = ['recipes', 'categories', 'recipe_imports', 'user_favorites', 'user_ratings']
+  const summary = {}
+  let removed = 0
+
+  for (const collectionName of collections) {
+    const count = await clearCollectionRecords(collectionName)
+    summary[collectionName] = count
+    removed += count
+  }
+
+  return {
+    success: true,
+    message: `已清空全部业务数据，共删除 ${removed} 条记录`,
+    data: {
+      collections: summary,
+      removed
+    }
+  }
+}
+
+async function clearCollectionRecords(collectionName) {
+  let removed = 0
+
+  while (true) {
+    const batch = await db.collection(collectionName).limit(100).get().catch(() => ({ data: [] }))
+    const items = batch.data || []
+
+    if (!items.length) {
+      break
+    }
+
+    for (const item of items) {
+      await db.collection(collectionName).doc(item._id).remove()
+      removed += 1
+    }
+  }
+
+  return removed
+}
+
+async function repairPresetRecipeImages(data) {
+  const limit = Math.max(1, Math.min(Number(data.limit) || 100, 100))
+  const result = await db.collection('recipes').limit(limit).get()
+  const recipes = result.data || []
+  const updatedTitles = []
+
+  for (const recipe of recipes) {
+    const nextImage = normalizeRecipeImage(recipe.image, recipe)
+    if (nextImage === String(recipe.image || '').trim()) {
+      continue
+    }
+
+    await db.collection('recipes').doc(recipe._id).update({
+      data: {
+        image: nextImage,
+        updatedAt: new Date()
+      }
+    })
+
+    updatedTitles.push(String(recipe.title || '').trim())
+  }
+
+  return {
+    success: true,
+    message: updatedTitles.length ? `已修复 ${updatedTitles.length} 条菜谱封面` : '当前没有需要修复的封面',
+    data: {
+      scanned: recipes.length,
+      updated: updatedTitles.length,
+      updatedTitles
+    }
+  }
+}
+
+async function enrichRecipeImages(data) {
+  const limit = Math.max(1, Math.min(Number(data.limit) || 30, 30))
+  const result = await db.collection('recipes').limit(limit).get()
+  const recipes = result.data || []
+  const updatedTitles = []
+  const skippedTitles = []
+
+  for (const recipe of recipes) {
+    const currentImage = String(recipe.image || '').trim()
+    const needsImage =
+      !currentImage ||
+      currentImage === '/images/default-dish.png' ||
+      isLegacyDefaultImage(currentImage) ||
+      currentImage.includes('source.unsplash.com')
+
+    if (!needsImage) {
+      skippedTitles.push(String(recipe.title || '').trim())
+      continue
+    }
+
+    const imageUrl = buildRecipePhotoUrl(recipe.title, recipe.category)
+    if (!imageUrl) {
+      skippedTitles.push(String(recipe.title || '').trim())
+      continue
+    }
+
+    await db.collection('recipes').doc(recipe._id).update({
+      data: {
+        image: imageUrl,
+        updatedAt: new Date()
+      }
+    })
+
+    updatedTitles.push(String(recipe.title || '').trim())
+  }
+
+  return {
+    success: true,
+    message: updatedTitles.length ? `已补全 ${updatedTitles.length} 条真实菜图` : '这批菜谱暂时没有检索到合适的真实菜图',
+    data: {
+      scanned: recipes.length,
+      updated: updatedTitles.length,
+      skipped: skippedTitles.length,
+      updatedTitles,
+      skippedTitles
+    }
+  }
+}
+
 async function autoImportByUrl(data) {
   const sourceUrl = normalizeUrl(data.sourceUrl || '')
   const sourcePlatform = (data.sourcePlatform || '').trim() || detectPlatformFromUrl(sourceUrl)
@@ -573,7 +837,7 @@ function buildRecipeRecord(data) {
   return {
     title: String(data.title).trim(),
     description: String(data.description).trim(),
-    image: data.image || getDefaultImage(),
+    image: normalizeRecipeImage(data.image, data),
     category: data.category || '家常菜',
     difficulty: data.difficulty || '简单',
     cookingTime: data.cookingTime || '30分钟',
@@ -594,6 +858,15 @@ function buildRecipeRecord(data) {
     createdAt: new Date(),
     updatedAt: new Date()
   }
+}
+
+function normalizeRecipeImage(image, data = {}) {
+  const value = String(image || '').trim()
+  if (value && !isLegacyDefaultImage(value) && value !== '/images/default-dish.png') {
+    return value
+  }
+
+  return buildRecipePhotoUrl(data.title, data.category)
 }
 
 function buildImportDraftRecord({ sourcePlatform, sourceUrl, rawText, sourceImages = [], ocrText = '', ocrDiagnostics = null, parsedRecipe }) {
@@ -1059,6 +1332,152 @@ function requestUrl(targetUrl, options = {}, redirectCount = 0) {
   })
 }
 
+async function fetchRecipeImageFromCommons(title, category) {
+  const queries = buildCommonsQueries(title, category)
+
+  for (const query of queries) {
+    const targetUrl = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrsearch=${encodeURIComponent(query)}&gsrlimit=5&prop=imageinfo&iiprop=url&iiurlwidth=1200&format=json`
+    let responseText = ''
+
+    try {
+      responseText = await withHardTimeout(
+        requestUrl(targetUrl, { timeout: 3500 }),
+        4000,
+        'commons search timeout'
+      )
+    } catch (error) {
+      continue
+    }
+
+    let payload = {}
+
+    try {
+      payload = JSON.parse(responseText)
+    } catch (error) {
+      payload = {}
+    }
+
+    const pages = Object.values((payload.query && payload.query.pages) || {})
+    const scored = pages
+      .map((page) => scoreCommonsPage(page, title, category))
+      .filter((item) => item.url)
+      .sort((a, b) => b.score - a.score)
+
+    if (scored.length > 0) {
+      return scored[0].url
+    }
+  }
+
+  return ''
+}
+
+function buildCommonsQueries(title, category) {
+  const cleanTitle = String(title || '').trim()
+  const titleTokens = cleanTitle.split(/[\s·/]+/).filter(Boolean)
+  const categoryKeywords = {
+    '荤菜': 'food dish',
+    '素菜': 'vegetable dish',
+    '荤素搭配': 'cooked dish',
+    '汤类': 'soup food',
+    '汤品': 'soup food',
+    '甜品': 'dessert food',
+    '主食': 'rice noodles food',
+    '凉菜': 'cold dish food',
+    '饮品': 'drink beverage'
+  }
+  const suffix = categoryKeywords[String(category || '').trim()] || 'food'
+  const queries = [
+    `${cleanTitle} ${suffix}`
+  ]
+
+  return Array.from(new Set(queries.map((item) => item.trim()).filter(Boolean)))
+}
+
+function withHardTimeout(promise, timeoutMs, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(message || 'timeout')), timeoutMs)
+    })
+  ])
+}
+
+function scoreCommonsPage(page, title, category) {
+  const info = Array.isArray(page && page.imageinfo) ? page.imageinfo[0] : null
+  const url = info ? (info.thumburl || info.url || '') : ''
+  const pageTitle = String(page && page.title || '').toLowerCase()
+  const queryTitle = String(title || '').toLowerCase()
+  const categoryText = String(category || '').toLowerCase()
+  let score = 0
+
+  if (pageTitle.includes(queryTitle)) score += 8
+  if (pageTitle.includes('food') || pageTitle.includes('dish')) score += 3
+  if (categoryText && pageTitle.includes(categoryText)) score += 1
+  if (/\.(jpg|jpeg|png|webp)$/i.test(url)) score += 1
+
+  return {
+    score,
+    url
+  }
+}
+
+function buildRecipePhotoUrl(title, category) {
+  const value = String(title || '').trim()
+  const categoryText = String(category || '').trim()
+
+  if (/红烧|糖醋|回锅|扣肉|排骨|里脊|酱牛肉/.test(value)) {
+    return 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=900&q=80'
+  }
+  if (/麻婆豆腐|豆腐/.test(value)) {
+    return 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=900&q=80'
+  }
+  if (/番茄|西红柿|鸡蛋|地三鲜|豆角|包菜|西兰花|莴笋|南瓜|茄子|秋葵|百合|白菜/.test(value)) {
+    return 'https://images.unsplash.com/photo-1563379091339-03246963d0b0?auto=format&fit=crop&w=900&q=80'
+  }
+  if (/汤|羹|露|糊/.test(value) || categoryText === '汤品') {
+    return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80'
+  }
+  if (/甜|奶|冻|圆子|红豆|雪梨|银耳|酸奶|西米/.test(value) || categoryText === '甜品') {
+    return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=80'
+  }
+  if (/鸡|鸭|牛|羊|虾|鱼/.test(value) || categoryText === '荤菜' || categoryText === '搭配') {
+    return 'https://images.unsplash.com/photo-1563379091339-03246963d0b0?auto=format&fit=crop&w=900&q=80'
+  }
+  if (categoryText === '素菜') {
+    return 'https://images.unsplash.com/photo-1563379091339-03246963d0b0?auto=format&fit=crop&w=900&q=80'
+  }
+
+  return 'https://images.unsplash.com/photo-1563379091339-03246963d0b0?auto=format&fit=crop&w=900&q=80'
+}
+
+function inferPhotoKeywords(title, category) {
+  return inferPhotoKeywordsSafe(title, category)
+}
+
+function inferPhotoKeywordsSafe(title, category) {
+  const value = String(title || '').trim()
+  const categoryText = String(category || '').trim()
+  const keywords = ['chinese food']
+
+  if (/[\u9e21]/.test(value)) keywords.push('chicken')
+  if (/[\u725b]/.test(value)) keywords.push('beef')
+  if (/[\u732a]|\u6392\u9aa8|\u91cc\u810a|\u8089\u672b|\u8089\u4e1d|\u8089\u7247/.test(value)) keywords.push('pork')
+  if (/[\u867e]/.test(value)) keywords.push('shrimp')
+  if (/[\u9c7c]/.test(value)) keywords.push('fish')
+  if (/[\u86cb]/.test(value)) keywords.push('egg')
+  if (/\u8c46\u8150/.test(value)) keywords.push('tofu')
+  if (/\u756a\u8304|\u897f\u7ea2\u67ff/.test(value)) keywords.push('tomato')
+  if (/\u571f\u8c46/.test(value)) keywords.push('potato')
+  if (/[\u9762\u7c89]/.test(value)) keywords.push('noodles')
+  if (/[\u996d]/.test(value)) keywords.push('rice')
+  if (/[\u6c64]/.test(value) || /\u6c64\u7c7b|\u6c64\u54c1/.test(categoryText)) keywords.push('soup')
+  if (/[\u751c\u7fb9\u5976\u9732]/.test(value) || /\u751c\u54c1/.test(categoryText)) keywords.push('dessert')
+  if (/[\u8336\u5976\u6c41]/.test(value) || /\u996e\u54c1/.test(categoryText)) keywords.push('drink')
+  if (/\u7d20\u83dc/.test(categoryText)) keywords.push('vegetable')
+
+  return Array.from(new Set(keywords)).slice(0, 4)
+}
+
 function extractRecipeMetadataFromHtml(html, sourceUrl) {
   const normalizedHtml = String(html || '')
   const title = firstNonEmpty([
@@ -1411,14 +1830,38 @@ function escapeRegExp(text) {
   return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function getDefaultImage() {
-  const defaultImages = [
+function getLegacyDefaultImages() {
+  return [
     'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&h=300&fit=crop',
     'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop',
     'https://images.unsplash.com/photo-1563379091339-03246963d0b0?w=400&h=300&fit=crop',
     'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=300&fit=crop',
     'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop'
   ]
+}
 
-  return defaultImages[Math.floor(Math.random() * defaultImages.length)]
+function isLegacyDefaultImage(image) {
+  return getLegacyDefaultImages().includes(String(image || '').trim())
+}
+
+function getCoverPalette(category) {
+  const palettes = {
+    '荤菜': ['c45b3b', 'fffaf4'],
+    '素菜': ['6f9860', 'fffaf4'],
+    '荤素搭配': ['bd8046', 'fffaf4'],
+    '汤类': ['caa06c', '214033'],
+    '汤品': ['caa06c', '214033'],
+    '甜品': ['b57977', 'fffaf4'],
+    '主食': ['aa6e45', 'fffaf4'],
+    '凉菜': ['6c8b84', 'fffaf4'],
+    '饮品': ['6f8fa0', 'fffaf4']
+  }
+
+  return palettes[String(category || '').trim()] || ['a65f3d', 'fffaf4']
+}
+
+function buildRecipeCoverUrl(title, category) {
+  const [background, foreground] = getCoverPalette(category)
+  const text = encodeURIComponent(String(title || '今日好味').trim() || '今日好味')
+  return `https://dummyimage.com/720x540/${background}/${foreground}.png&text=${text}`
 }

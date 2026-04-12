@@ -1,0 +1,38 @@
+<view class="page-shell">
+  <view class="surface-card section-shell share-hero">
+    <view class="section-kicker">SHARED MENU</view>
+    <view class="share-title">{{shareData.title}}</view>
+    <view class="share-subtitle" wx:if="{{shareData.subtitle}}">{{shareData.subtitle}}</view>
+    <view class="feedback-banner" wx:if="{{error}}">
+      <text>{{error}}</text>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell" wx:if="{{shareData.items.length}}">
+    <view class="share-list">
+      <view class="share-item" wx:for="{{shareData.items}}" wx:key="index">
+        <view class="share-item-index">{{index + 1}}</view>
+        <view class="share-item-copy">
+          <text class="share-item-title">{{item.name}}</text>
+          <text class="share-item-meta">{{item.category || '家常菜'}} · {{item.cookingTime || '--'}} · {{item.servings || 2}} 人份</text>
+          <text class="share-item-meta" wx:if="{{item.comment}}">{{item.comment}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="surface-card section-shell empty-panel" wx:else>
+    <text class="empty-title">这份分享内容暂时不可用</text>
+    <text class="empty-desc">可以返回首页重新挑选菜单。</text>
+  </view>
+
+  <view class="bottom-dock rise-enter">
+    <view class="dock-content">
+      <view class="dock-copy">
+        <text class="dock-title">打开晚餐手记</text>
+        <text class="dock-desc">继续挑菜、整理菜单，或者自己也做一份今晚安排。</text>
+      </view>
+      <button class="primary-btn dock-action" bindtap="goHome">去首页</button>
+    </view>
+  </view>
+</view>

@@ -43,7 +43,7 @@
   <view class="rating-list section-shell" wx:if="{{selectedDishes.length > 0}}">
     <view class="surface-card rating-card fade-enter" wx:for="{{selectedDishes}}" wx:key="id">
       <view class="rating-header-row">
-        <image class="rating-image" src="{{item.image}}" mode="aspectFill"></image>
+        <image class="rating-image" src="{{item.displayImage || item.image}}" mode="aspectFill"></image>
         <view class="rating-copy">
           <view class="chip-row">
             <text class="chip chip-light">{{item.category}}</text>

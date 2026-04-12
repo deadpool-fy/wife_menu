@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/share-menu/share-menu",
     "pages/detail/detail",
     "pages/rating/rating",
     "pages/category/category",

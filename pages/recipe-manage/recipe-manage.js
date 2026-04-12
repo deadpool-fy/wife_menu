@@ -1,4 +1,5 @@
 const cloudApiService = require('../../utils/cloudApi.js')
+const app = getApp()
 
 Page({
   data: {
@@ -19,12 +20,39 @@ Page({
     isLoading: false
   },
 
-  onLoad() {
+  async onLoad() {
+    const allowed = await this.ensureAdminAccess()
+    if (!allowed) {
+      return
+    }
     this.loadData()
   },
 
-  onShow() {
+  async onShow() {
+    const allowed = await this.ensureAdminAccess()
+    if (!allowed) {
+      return
+    }
     this.loadData()
+  },
+
+  async ensureAdminAccess() {
+    const result = await app.ensureAdminStatus(true)
+    if (result.isAdmin) {
+      return true
+    }
+
+    wx.showModal({
+      title: '无后台权限',
+      content: '当前账号不在管理员名单中，无法管理菜谱。',
+      showCancel: false,
+      success: () => {
+        wx.switchTab({
+          url: '/pages/index/index'
+        })
+      }
+    })
+    return false
   },
 
   async loadData() {

@@ -1,4 +1,5 @@
 const cloudApiService = require('../../utils/cloudApi.js')
+const app = getApp()
 
 const CALORIE_RULES = [
   { keywords: ['米饭', '熟米饭'], kcalPer100g: 116 },
@@ -288,6 +289,10 @@ Page({
   },
 
   async onLoad(options = {}) {
+    const allowed = await this.ensureAdminAccess()
+    if (!allowed) {
+      return
+    }
     const recipeId = String(options.id || '').trim()
     this.setData({
       isEdit: !!recipeId,
@@ -306,6 +311,25 @@ Page({
     }
 
     this.updateCalorieEstimate(this.data.formData.ingredients)
+  },
+
+  async ensureAdminAccess() {
+    const result = await app.ensureAdminStatus(true)
+    if (result.isAdmin) {
+      return true
+    }
+
+    wx.showModal({
+      title: '?????',
+      content: '???????????????????????',
+      showCancel: false,
+      success: () => {
+        wx.switchTab({
+          url: '/pages/index/index'
+        })
+      }
+    })
+    return false
   },
 
   async loadCategories() {

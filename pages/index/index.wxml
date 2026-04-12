@@ -66,7 +66,7 @@
     <scroll-view class="selected-scroll" scroll-x="true" show-scrollbar="{{false}}">
       <view class="selected-row">
         <view class="selected-card" wx:for="{{selectedDishes}}" wx:key="id">
-          <image class="selected-image" src="{{item.image}}" mode="aspectFill"></image>
+          <image class="selected-image" src="{{item.displayImage || item.image}}" mode="aspectFill"></image>
           <view class="selected-overlay">
             <text class="selected-name">{{item.name}}</text>
             <text class="selected-meta">{{item.category}}</text>
@@ -85,8 +85,13 @@
         <text class="section-subtitle">挑一份更有卖相的家常菜单，兼顾速度、热量和下厨难度。</text>
       </view>
       <view class="action-group">
-        <view class="tonal-btn action-pill" bindtap="goToAdmin">后台管理</view>
+        <view class="tonal-btn action-pill" bindtap="goToAdmin" wx:if="{{adminEntryVisible}}">进入工作台</view>
         <view class="ghost-btn action-pill" bindtap="refreshRecommend">换一批</view>
+      </view>
+    </view>
+    <view class="mode-chip-row">
+      <view class="mode-chip {{recommendMode === item.id ? 'active' : ''}}" wx:for="{{recommendModes}}" wx:key="id" bindtap="switchRecommendMode" data-mode="{{item.id}}">
+        <text>{{item.label}}</text>
       </view>
     </view>
     <view class="lux-divider"></view>
@@ -98,7 +103,7 @@
     <view class="recommend-list" wx:if="{{recommendDishes.length > 0}}">
       <view class="recommend-card" wx:for="{{recommendDishes}}" wx:key="id">
         <view class="recommend-main" bindtap="goToDetail" data-id="{{item.id}}">
-          <image class="recommend-image" src="{{item.image}}" mode="aspectFill"></image>
+          <image class="recommend-image" src="{{item.displayImage || item.image}}" mode="aspectFill"></image>
           <view class="recommend-copy">
             <view class="chip-row">
               <text class="chip chip-light">{{item.category}}</text>

@@ -4,12 +4,12 @@
       <text>DISCOVER</text>
       <text>按口味筛选</text>
     </view>
-    <view class="hero-title">别再随便凑一顿，先从菜系灵感开始。</view>
-    <view class="hero-subtitle">把荤素、汤品和甜口拆开看，搭配起来会更有节奏，也更像一份认真准备的菜单。</view>
+    <view class="hero-title">别再随便凑一顿饭，先从分类灵感开始。</view>
+    <view class="hero-subtitle">先挑今天更想吃荤一点、清爽一点，还是来一碗热汤，再从对应分类里挑出真正想做的菜。</view>
     <view class="hero-metrics">
       <view class="hero-metric">
         <text class="hero-metric-value">{{filteredDishes.length}}</text>
-        <text class="hero-metric-label">当前分类</text>
+        <text class="hero-metric-label">当前结果</text>
       </view>
       <view class="hero-metric">
         <text class="hero-metric-value">{{selectedCount}}</text>
@@ -27,7 +27,7 @@
       <view class="section-title-wrap">
         <text class="section-kicker">FILTERS</text>
         <text class="section-title">分类筛选</text>
-        <text class="section-subtitle">先确定今晚要偏饱腹、清爽还是有点仪式感，再决定具体做什么。</text>
+        <text class="section-subtitle">切换分类时会直接重算数量和列表，让你一眼看出当前这一组到底还剩哪些菜。</text>
       </view>
       <text class="result-count">{{filteredDishes.length}} 道</text>
     </view>
@@ -37,9 +37,16 @@
         <view class="category-chip {{currentCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="switchCategory" data-category="{{item.id}}">
           <text class="category-icon">{{item.icon}}</text>
           <text class="category-name">{{item.name}}</text>
+          <text class="category-count">{{item.count}} 道</text>
         </view>
       </view>
     </scroll-view>
+
+    <view class="scene-chip-row">
+      <view class="scene-chip {{currentSceneMode === item.id ? 'active' : ''}}" wx:for="{{sceneModes}}" wx:key="id" bindtap="switchSceneMode" data-mode="{{item.id}}">
+        <text>{{item.label}}</text>
+      </view>
+    </view>
 
     <view class="feedback-banner" wx:if="{{error}}">
       <text>{{error}}</text>
@@ -49,7 +56,7 @@
   <view class="dish-grid section-shell" wx:if="{{filteredDishes.length > 0}}">
     <view class="dish-card surface-card fade-enter" wx:for="{{filteredDishes}}" wx:key="id">
       <view class="dish-visual" bindtap="goToDetail" data-id="{{item.id}}">
-        <image class="dish-image" src="{{item.image}}" mode="aspectFill"></image>
+        <image class="dish-image" src="{{item.displayImage || item.image}}" mode="aspectFill"></image>
         <view class="dish-gradient"></view>
         <view class="dish-topline">
           <text class="chip chip-light">{{item.category}}</text>
@@ -62,7 +69,7 @@
       </view>
       <view class="dish-footer">
         <view class="dish-stat">
-          <text class="stat-label">烹饪节奏</text>
+          <text class="stat-label">烹饪时长</text>
           <text class="stat-value">{{item.cookingTime}}</text>
         </view>
         <view class="dish-stat">
@@ -80,8 +87,8 @@
 
   <view class="surface-card section-shell empty-panel fade-enter" wx:else>
     <text class="empty-title">这个分类暂时还没有内容</text>
-    <text class="empty-desc">切换到别的分类看看，或者先返回全部菜品重新搭配。</text>
-    <view class="ghost-btn empty-btn" bindtap="switchCategory" data-category="all">查看全部菜品</view>
+    <text class="empty-desc">可以切换到别的分类看看，或者先回到全部菜谱重新搭配。</text>
+    <view class="ghost-btn empty-btn" bindtap="switchCategory" data-category="all">查看全部菜谱</view>
   </view>
 
   <view class="bottom-dock rise-enter" wx:if="{{selectedCount > 0}}">
@@ -89,7 +96,7 @@
       <view class="icon-badge">选</view>
       <view class="dock-copy">
         <text class="dock-title">已经选中 {{selectedCount}} 道菜</text>
-        <text class="dock-desc">回到首页就能整理成菜单并发送，不用担心刚刚的选择丢失。</text>
+        <text class="dock-desc">回到首页就能整理成今晚菜单，不用担心刚刚的选择丢失。</text>
       </view>
       <button class="primary-btn dock-action" bindtap="goToMenu">查看菜单</button>
     </view>

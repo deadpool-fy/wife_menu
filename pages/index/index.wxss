@@ -227,6 +227,34 @@
   flex-wrap: wrap;
 }
 
+.mode-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.mode-chip {
+  min-width: 132rpx;
+  height: 68rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 250, 245, 0.8);
+  border: 1rpx solid rgba(124, 61, 35, 0.08);
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  line-height: 68rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.mode-chip.active {
+  background: linear-gradient(135deg, #db673a 0%, #c24f27 100%);
+  border-color: transparent;
+  color: var(--text-inverse);
+  box-shadow: 0 14rpx 28rpx rgba(194, 79, 39, 0.18);
+}
+
 .selected-scroll {
   width: 100%;
 }

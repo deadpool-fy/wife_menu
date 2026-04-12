@@ -53,12 +53,40 @@ class CloudApiService {
     return await this.callCloudFunction('recipe-manager', 'getStats');
   }
 
+  async getAdminAccess() {
+    return await this.callCloudFunction('recipe-manager', 'getAdminAccess');
+  }
+
   async getWeatherSnapshot(payload) {
     return await this.callCloudFunction('recipe-manager', 'getWeatherSnapshot', payload);
   }
 
   async createImportDraft(payload) {
     return await this.callCloudFunction('recipe-manager', 'createImportDraft', payload);
+  }
+
+  async seedPresetRecipes(payload = {}) {
+    return await this.callCloudFunction('recipe-manager', 'seedPresetRecipes', payload);
+  }
+
+  async clearRecipesData() {
+    return await this.callCloudFunction('recipe-manager', 'clearRecipesData');
+  }
+
+  async clearAllAppData() {
+    return await this.callCloudFunction('recipe-manager', 'clearAllAppData');
+  }
+
+  async clearCategoriesData() {
+    return await this.callCloudFunction('recipe-manager', 'clearCategoriesData');
+  }
+
+  async repairPresetRecipeImages(payload = {}) {
+    return await this.callCloudFunction('recipe-manager', 'repairPresetRecipeImages', payload);
+  }
+
+  async enrichRecipeImages(payload = {}) {
+    return await this.callCloudFunction('recipe-manager', 'enrichRecipeImages', payload);
   }
 
   async autoImportByUrl(payload) {

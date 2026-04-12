@@ -1,5 +1,24 @@
 const app = getApp()
 const messageService = require('../../utils/messageService.js')
+const { decorateRecipeImage } = require('../../utils/recipeImage.js')
+
+function buildSharedRatingPath(ratings = []) {
+  const payload = {
+    type: 'rating',
+    title: '今晚菜单反馈',
+    subtitle: '这次吃完后的真实感受',
+    items: ratings.slice(0, 8).map((dish) => ({
+      name: dish.name,
+      category: dish.category,
+      cookingTime: dish.cookingTime,
+      servings: dish.servings,
+      comment: dish.comment || '',
+      calories: dish.calories
+    }))
+  }
+
+  return '/pages/share-menu/share-menu?payload=' + encodeURIComponent(JSON.stringify(payload))
+}
 
 Page({
   data: {
@@ -26,11 +45,11 @@ Page({
     const storedRatings = wx.getStorageSync('menuRatings') || {}
     const dishesWithRating = app.getSelectedDishes().map((dish) => {
       const cached = storedRatings[dish.id] || {}
-      return {
+      return decorateRecipeImage({
         ...dish,
         rating: Number(cached.rating || dish.rating || 0),
         comment: String(cached.comment || dish.comment || '')
-      }
+      })
     })
 
     this.setData({ selectedDishes: dishesWithRating })
@@ -197,7 +216,7 @@ Page({
       sharePanelVisible: true,
       shareTitle: '今晚菜单反馈已整理好',
       shareSummary: this.buildShareSummary(ratings),
-      sharePath: '/pages/rating/rating'
+      sharePath: buildSharedRatingPath(ratings)
     })
   },
 

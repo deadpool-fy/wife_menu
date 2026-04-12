@@ -1,23 +1,129 @@
-﻿const app = getApp()
+const app = getApp()
 const cloudApiService = require('../../utils/cloudApi.js')
+const { decorateRecipeImage } = require('../../utils/recipeImage.js')
+
+const CATEGORY_ALIASES = {
+  all: ['全部', 'all'],
+  meat: ['荤菜', '肉菜', 'meat'],
+  vegetable: ['素菜', '凉菜', 'vegetable'],
+  mixed: ['搭配', '荤素搭配', '家常菜', '主食', 'mixed'],
+  soup: ['汤品', '汤类', 'soup'],
+  dessert: ['甜品', '饮品', 'dessert']
+}
+
+const DEFAULT_CATEGORIES = [
+  { id: 'all', name: '全部', icon: '全' },
+  { id: 'meat', name: '荤菜', icon: '肉' },
+  { id: 'vegetable', name: '素菜', icon: '素' },
+  { id: 'mixed', name: '搭配', icon: '拼' },
+  { id: 'soup', name: '汤品', icon: '汤' },
+  { id: 'dessert', name: '甜品', icon: '甜' }
+]
+
+const DEFAULT_SCENES = [
+  { id: 'all', label: '全部灵感' },
+  { id: 'quick', label: '下班快手' },
+  { id: 'light', label: '轻负担' },
+  { id: 'duo', label: '两人餐' }
+]
+
+function buildCategoriesWithCounts(allDishes = []) {
+  return DEFAULT_CATEGORIES.map((category) => ({
+    ...category,
+    count: category.id === 'all'
+      ? allDishes.length
+      : allDishes.filter((dish) => dish.categoryType === category.id).length
+  }))
+}
+
+function parseCookingMinutes(text) {
+  const value = String(text || '').trim()
+  if (!value) return null
+
+  const hourMatch = value.match(/(\d+(?:\.\d+)?)\s*小时/)
+  if (hourMatch) return Math.round(Number(hourMatch[1]) * 60)
+
+  const minuteMatch = value.match(/(\d+(?:\.\d+)?)\s*分钟/)
+  if (minuteMatch) return Math.round(Number(minuteMatch[1]))
+
+  return null
+}
+
+function parseCalories(value) {
+  const matched = String(value || '').match(/(\d+(?:\.\d+)?)/)
+  return matched ? Number(matched[1]) : null
+}
+
+function normalizeCategoryName(rawCategory) {
+  const value = String(rawCategory || '').trim()
+  if (!value) return '搭配'
+
+  const matched = Object.entries(CATEGORY_ALIASES).find(([, aliases]) => aliases.includes(value))
+  if (!matched) return value
+
+  const [id] = matched
+  const item = DEFAULT_CATEGORIES.find((category) => category.id === id)
+  return item ? item.name : value
+}
+
+function getCategoryType(rawCategory) {
+  const value = String(rawCategory || '').trim()
+  const matched = Object.entries(CATEGORY_ALIASES).find(([, aliases]) => aliases.includes(value))
+  return matched ? matched[0] : 'mixed'
+}
+
+function matchSceneMode(dish, mode) {
+  const minutes = parseCookingMinutes(dish.cookingTime)
+  const calories = parseCalories(dish.calories)
+  const servings = Number(dish.servings || 0)
+
+  if (mode === 'quick') {
+    return (minutes !== null && minutes <= 20) || (dish.difficulty === '简单' && minutes !== null && minutes <= 30)
+  }
+
+  if (mode === 'light') {
+    return calories !== null && calories <= 400
+  }
+
+  if (mode === 'duo') {
+    return servings > 0 && servings <= 2
+  }
+
+  return true
+}
+
+function buildDish(recipe) {
+  const category = normalizeCategoryName(recipe.category)
+
+  return decorateRecipeImage({
+    id: recipe._id,
+    name: recipe.title,
+    category,
+    categoryType: getCategoryType(category),
+    difficulty: recipe.difficulty || '简单',
+    cookingTime: recipe.cookingTime || '30分钟',
+    servings: recipe.servings || 2,
+    calories: recipe.calories || '--',
+    rating: recipe.rating || 0,
+    likeCount: recipe.likeCount || 0,
+    image: recipe.image || '',
+    importSource: recipe.importSource || '',
+    selected: false
+  })
+}
 
 Page({
   data: {
     currentCategory: 'all',
+    currentSceneMode: 'all',
     categoryName: '全部',
     allDishes: [],
     filteredDishes: [],
     selectedCount: 0,
     loading: false,
     error: null,
-    categories: [
-      { id: 'all', name: '全部', icon: '全' },
-      { id: 'meat', name: '荤菜', icon: '肉' },
-      { id: 'vegetable', name: '素菜', icon: '素' },
-      { id: 'mixed', name: '搭配', icon: '拼' },
-      { id: 'soup', name: '汤品', icon: '汤' },
-      { id: 'dessert', name: '甜品', icon: '甜' }
-    ]
+    categories: DEFAULT_CATEGORIES,
+    sceneModes: DEFAULT_SCENES
   },
 
   onLoad() {
@@ -43,137 +149,33 @@ Page({
     try {
       const response = await cloudApiService.getRecipes({
         page: 1,
-        limit: 100
+        limit: 200
       })
 
       if (!response.success) {
-        throw new Error(response.message || '获取菜品数据失败')
+        throw new Error(response.message || '获取菜谱数据失败')
       }
 
-      const allDishes = response.data.recipes.map((recipe) => ({
-        id: recipe._id,
-        name: recipe.title,
-        category: recipe.category || '家常菜',
-        categoryType: this.getCategoryType(recipe.category),
-        difficulty: recipe.difficulty || '简单',
-        cookingTime: recipe.cookingTime || '30分钟',
-        servings: recipe.servings || 2,
-        calories: recipe.calories || '--',
-        rating: recipe.rating || 0,
-        likeCount: recipe.likeCount || 0,
-        image: recipe.image || '/images/default-dish.png',
-        selected: false
-      }))
+      const allDishes = (response.data.recipes || []).map(buildDish)
 
       this.setData({
         allDishes,
         filteredDishes: allDishes,
+        categories: buildCategoriesWithCounts(allDishes),
         loading: false
       })
 
       this.updateSelectedStatus()
     } catch (error) {
-      console.error('加载菜品数据失败:', error)
-
-      const mockDishes = this.getMockDishes()
-
+      console.error('加载菜谱数据失败:', error)
       this.setData({
-        allDishes: mockDishes,
-        filteredDishes: mockDishes,
+        allDishes: [],
+        filteredDishes: [],
+        categories: buildCategoriesWithCounts([]),
         loading: false,
-        error: '网络连接失败，已切换到本地菜谱'
+        error: '菜谱数据暂时加载失败，请稍后重试'
       })
     }
-  },
-
-  getCategoryType(category) {
-    const categoryMap = {
-      荤菜: 'meat',
-      素菜: 'vegetable',
-      荤素搭配: 'mixed',
-      汤类: 'soup',
-      汤品: 'soup',
-      甜品: 'dessert'
-    }
-
-    return categoryMap[category] || 'mixed'
-  },
-
-  getMockDishes() {
-    return [
-      {
-        id: 1,
-        name: '宫保鸡丁',
-        category: '荤菜',
-        categoryType: 'meat',
-        difficulty: '中等',
-        cookingTime: '30分钟',
-        servings: 2,
-        calories: 420,
-        image: 'https://via.placeholder.com/300x200/214033/fffaf4?text=%E5%AE%AB%E4%BF%9D%E9%B8%A1%E4%B8%81',
-        selected: false
-      },
-      {
-        id: 2,
-        name: '麻婆豆腐',
-        category: '素菜',
-        categoryType: 'vegetable',
-        difficulty: '简单',
-        cookingTime: '20分钟',
-        servings: 2,
-        calories: 290,
-        image: 'https://via.placeholder.com/300x200/d96b4d/fffaf4?text=%E9%BA%BB%E5%A9%86%E8%B1%86%E8%85%90',
-        selected: false
-      },
-      {
-        id: 3,
-        name: '番茄牛腩',
-        category: '荤菜',
-        categoryType: 'meat',
-        difficulty: '中等',
-        cookingTime: '50分钟',
-        servings: 3,
-        calories: 510,
-        image: 'https://via.placeholder.com/300x200/7ea68a/fffaf4?text=%E7%95%AA%E8%8C%84%E7%89%9B%E8%85%A9',
-        selected: false
-      },
-      {
-        id: 4,
-        name: '清炒时蔬',
-        category: '素菜',
-        categoryType: 'vegetable',
-        difficulty: '简单',
-        cookingTime: '12分钟',
-        servings: 2,
-        calories: 160,
-        image: 'https://via.placeholder.com/300x200/f1c27d/214033?text=%E6%B8%85%E7%82%92%E6%97%B6%E8%94%AC',
-        selected: false
-      },
-      {
-        id: 5,
-        name: '菌菇鸡汤',
-        category: '汤品',
-        categoryType: 'soup',
-        difficulty: '简单',
-        cookingTime: '40分钟',
-        servings: 3,
-        calories: 220,
-        image: 'https://via.placeholder.com/300x200/bf5638/fffaf4?text=%E8%8F%8C%E8%8F%87%E9%B8%A1%E6%B1%A4',
-        selected: false
-      },
-      {
-        id: 6,
-        name: '银耳雪梨羹',
-        category: '甜品',
-        categoryType: 'dessert',
-        difficulty: '简单',
-        cookingTime: '35分钟',
-        servings: 3,
-        calories: 180,
-        image: 'https://via.placeholder.com/300x200/163127/fffaf4?text=%E9%93%B6%E8%80%B3%E9%9B%AA%E6%A2%A8%E7%BE%B9',
-        selected: false
-      }
-    ]
   },
 
   loadSelectedDishes() {
@@ -184,14 +186,12 @@ Page({
 
   updateSelectedStatus() {
     const selectedIds = new Set(app.getSelectedDishes().map((dish) => dish.id))
-
     this.setData({
       allDishes: this.data.allDishes.map((dish) => ({
         ...dish,
         selected: selectedIds.has(dish.id)
       }))
     })
-
     this.filterDishes()
   },
 
@@ -207,13 +207,21 @@ Page({
     this.filterDishes()
   },
 
+  switchSceneMode(e) {
+    this.setData({
+      currentSceneMode: e.currentTarget.dataset.mode || 'all'
+    })
+    this.filterDishes()
+  },
+
   filterDishes() {
-    const { currentCategory, allDishes } = this.data
+    const { currentCategory, currentSceneMode, allDishes } = this.data
+    const categoryFiltered = currentCategory === 'all'
+      ? allDishes
+      : allDishes.filter((dish) => dish.categoryType === currentCategory)
 
     this.setData({
-      filteredDishes: currentCategory === 'all'
-        ? allDishes
-        : allDishes.filter((dish) => dish.categoryType === currentCategory)
+      filteredDishes: categoryFiltered.filter((dish) => matchSceneMode(dish, currentSceneMode))
     })
   },
 
@@ -228,16 +236,10 @@ Page({
 
     if (dish.selected) {
       app.removeSelectedDish(dish.id)
-      wx.showToast({
-        title: '已移出菜单',
-        icon: 'success'
-      })
+      wx.showToast({ title: '已移出菜单', icon: 'success' })
     } else {
       app.addSelectedDish(dish)
-      wx.showToast({
-        title: '已加入菜单',
-        icon: 'success'
-      })
+      wx.showToast({ title: '已加入菜单', icon: 'success' })
     }
 
     this.loadSelectedDishes()

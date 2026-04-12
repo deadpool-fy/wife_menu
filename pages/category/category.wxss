@@ -20,6 +20,34 @@
   padding-bottom: 8rpx;
 }
 
+.scene-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.scene-chip {
+  min-width: 140rpx;
+  height: 68rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid rgba(124, 61, 35, 0.08);
+  color: var(--text-secondary);
+  font-size: var(--font-xs);
+  line-height: 68rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.scene-chip.active {
+  background: linear-gradient(135deg, #db673a 0%, #c24f27 100%);
+  border-color: transparent;
+  color: var(--text-inverse);
+  box-shadow: 0 14rpx 28rpx rgba(194, 79, 39, 0.18);
+}
+
 .category-chip {
   min-width: 146rpx;
   padding: 18rpx 20rpx;
@@ -59,6 +87,15 @@
 .category-name {
   font-size: var(--font-sm);
   font-weight: 600;
+}
+
+.category-count {
+  font-size: 20rpx;
+  color: var(--text-tertiary);
+}
+
+.category-chip.active .category-count {
+  color: rgba(255, 250, 244, 0.72);
 }
 
 .dish-grid {

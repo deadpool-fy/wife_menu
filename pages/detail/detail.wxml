@@ -1,6 +1,13 @@
 <view class="page-shell detail-shell">
   <view class="detail-hero rise-enter">
-    <image class="detail-cover" src="{{dishDetail.image}}" mode="aspectFill"></image>
+    <image wx:if="{{!dishDetail.usePoster}}" class="detail-cover" src="{{dishDetail.displayImage}}" mode="aspectFill"></image>
+    <view wx:else class="detail-cover smart-cover poster-tone-{{dishDetail.posterTone}}">
+      <view class="smart-cover-copy detail-poster-copy">
+        <text class="smart-cover-kicker">{{dishDetail.posterCategory}}</text>
+        <text class="smart-cover-title detail-poster-title">{{dishDetail.posterTitle}}</text>
+        <text class="smart-cover-subtitle">今晚上桌</text>
+      </view>
+    </view>
     <view class="detail-mask"></view>
     <view class="detail-copy">
       <view class="hero-eyebrow">
@@ -58,7 +65,7 @@
       <view class="section-title-wrap">
         <text class="section-kicker">INGREDIENTS</text>
         <text class="section-title">食材清单</text>
-        <text class="section-subtitle">配料干净清晰一些，做饭时会更省脑子。</text>
+        <text class="section-subtitle">配料清晰一些，做饭时会更省脑子。</text>
       </view>
       <text class="result-count">{{dishDetail.ingredients.length}} 项</text>
     </view>
@@ -79,7 +86,7 @@
       <view class="section-title-wrap">
         <text class="section-kicker">STEPS</text>
         <text class="section-title">制作步骤</text>
-        <text class="section-subtitle">步骤改成更清楚的时间线，做起来不会像看一段糊成团的说明书。</text>
+        <text class="section-subtitle">步骤拆得更清楚一点，做起来就不会像看一段糊成团的说明书。</text>
       </view>
       <text class="result-count">{{dishDetail.steps.length}} 步</text>
     </view>
@@ -109,14 +116,13 @@
 
   <view class="bottom-dock rise-enter" wx:if="{{!sharePanelVisible}}">
     <view class="dock-content detail-dock">
-      <button class="ghost-btn detail-back" bindtap="goBack">返回</button>
-      <button class="primary-btn detail-main" bindtap="addToMenu" wx:if="{{!isSelected}}">加入菜单</button>
-      <button class="tonal-btn detail-main selected-btn" bindtap="removeFromMenu" wx:else>已加入，点此移除</button>
-      <button class="ghost-btn detail-share" bindtap="shareDish">分享</button>
+      <button class="ghost-btn detail-side-btn" bindtap="goBack">返回</button>
+      <button class="primary-btn detail-main-btn" bindtap="addToMenu" wx:if="{{!isSelected}}">加入菜单</button>
+      <button class="tonal-btn detail-main-btn selected-btn" bindtap="removeFromMenu" wx:else>已加入菜单</button>
+      <button class="ghost-btn detail-side-btn" bindtap="shareDish">分享</button>
     </view>
   </view>
 </view>
-
 
 <view class="share-panel-mask" wx:if="{{sharePanelVisible}}" bindtap="closeSharePanel"></view>
 <view class="share-panel rise-enter" wx:if="{{sharePanelVisible}}">

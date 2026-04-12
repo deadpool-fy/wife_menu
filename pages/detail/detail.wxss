@@ -15,11 +15,19 @@
   height: 100%;
 }
 
+.detail-poster-copy {
+  padding: 34rpx;
+}
+
+.detail-poster-title {
+  font-size: 60rpx;
+}
+
 .detail-mask {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(16, 24, 20, 0.16) 0%, rgba(16, 24, 20, 0.82) 100%),
+    linear-gradient(180deg, rgba(16, 24, 20, 0.18) 0%, rgba(16, 24, 20, 0.82) 100%),
     radial-gradient(circle at top right, rgba(241, 194, 125, 0.28), transparent 28%);
 }
 
@@ -178,16 +186,16 @@
 }
 
 .detail-dock {
-  gap: 14rpx;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 16rpx;
+  align-items: center;
 }
 
-.detail-back,
-.detail-share {
-  min-width: 110rpx;
-}
-
-.detail-main {
-  flex: 1;
+.detail-side-btn,
+.detail-main-btn {
+  width: 100%;
+  min-width: 0;
 }
 
 .selected-btn {

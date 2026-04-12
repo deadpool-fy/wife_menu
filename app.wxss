@@ -430,6 +430,89 @@ button.tonal-btn::after {
   text-align: center;
 }
 
+.smart-cover {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #d96b4d 0%, #a64b2f 100%);
+}
+
+.smart-cover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(255, 243, 229, 0.22), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.08), transparent 36%);
+}
+
+.smart-cover-copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 22rpx;
+  color: #fffaf4;
+  background: linear-gradient(180deg, rgba(16, 24, 20, 0) 0%, rgba(16, 24, 20, 0.58) 100%);
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+.smart-cover-kicker {
+  display: inline-block;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 250, 244, 0.16);
+  font-size: 18rpx;
+  letter-spacing: 2rpx;
+}
+
+.smart-cover-title {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 34rpx;
+  line-height: 1.18;
+  font-weight: 700;
+}
+
+.smart-cover-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: rgba(255, 250, 244, 0.82);
+}
+
+.poster-tone-meat {
+  background: linear-gradient(135deg, #c45b3b 0%, #8e3f2a 100%);
+}
+
+.poster-tone-veg {
+  background: linear-gradient(135deg, #769d63 0%, #486d3d 100%);
+}
+
+.poster-tone-mixed {
+  background: linear-gradient(135deg, #c7864a 0%, #955124 100%);
+}
+
+.poster-tone-soup {
+  background: linear-gradient(135deg, #cfa56f 0%, #9c6a33 100%);
+}
+
+.poster-tone-dessert {
+  background: linear-gradient(135deg, #bf7c78 0%, #8b5451 100%);
+}
+
+.poster-tone-staple {
+  background: linear-gradient(135deg, #b87445 0%, #7a4828 100%);
+}
+
+.poster-tone-cold {
+  background: linear-gradient(135deg, #6d8f86 0%, #3f6158 100%);
+}
+
+.poster-tone-drink {
+  background: linear-gradient(135deg, #7896a8 0%, #4b6573 100%);
+}
+
 .empty-title {
   display: block;
   font-size: var(--font-lg);
